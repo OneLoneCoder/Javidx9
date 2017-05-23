@@ -1,39 +1,39 @@
 /*
-OneLoneCoder.com - Command Line Tetris
-"Put Your Money Where Your Mouth Is" - @Javidx9
-
-Disclaimer
-~~~~~~~~~~
-I don't care what you use this for. It's intended to be educational, and perhaps
-to the oddly minded - a little bit of fun. Please hack this, change it and use it
-in any way you see fit. BUT, you acknowledge that I am not responsible for anything
-bad that happens as a result of your actions. However, if good stuff happens, I
-would appreciate a shout out, or at least give the blog some publicity for me.
-Cheers!
-
-Background
-~~~~~~~~~~
-I made a video "8-Bits of advice for new programmers" (https://youtu.be/vVRCJ52g5m4)
-and suggested that building a tetris clone instead of Dark Sould IV might be a better 
-approach to learning to code. Tetris is nice as it makes you think about algorithms. 
-
-Controls are Arrow keys Left, Right & Down. Use Z to rotate the piece. 
-You score 25pts per tetronimo, and 2^(number of lines)*100 when you get lines.
-
-Future Modifications
-~~~~~~~~~~~~~~~~~~~~
-1) Show next block and line counter
-
-Author
-~~~~~~
-Twitter: @javidx9
-Blog: www.onelonecoder.com
-
-Video:
-~~~~~~
-xxxxxxx
-
-Last Updated: 30/03/2017
+	OneLoneCoder.com - Command Line Tetris
+	"Put Your Money Where Your Mouth Is" - @Javidx9
+	
+	Disclaimer
+	~~~~~~~~~~
+	I don't care what you use this for. It's intended to be educational, and perhaps
+	to the oddly minded - a little bit of fun. Please hack this, change it and use it
+	in any way you see fit. BUT, you acknowledge that I am not responsible for anything
+	bad that happens as a result of your actions. However, if good stuff happens, I
+	would appreciate a shout out, or at least give the blog some publicity for me.
+	Cheers!
+	
+	Background
+	~~~~~~~~~~
+	I made a video "8-Bits of advice for new programmers" (https://youtu.be/vVRCJ52g5m4)
+	and suggested that building a tetris clone instead of Dark Sould IV might be a better 
+	approach to learning to code. Tetris is nice as it makes you think about algorithms. 
+	
+	Controls are Arrow keys Left, Right & Down. Use Z to rotate the piece. 
+	You score 25pts per tetronimo, and 2^(number of lines)*100 when you get lines.
+	
+	Future Modifications
+	~~~~~~~~~~~~~~~~~~~~
+	1) Show next block and line counter
+	
+	Author
+	~~~~~~
+	Twitter: @javidx9
+	Blog: www.onelonecoder.com
+	
+	Video:
+	~~~~~~
+	https://youtu.be/8OK8_tHeCIA
+	
+	Last Updated: 30/03/2017
 */
 
 #include <iostream>
