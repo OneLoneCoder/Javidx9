@@ -73,6 +73,7 @@ See my other videos for examples!
 #include <chrono>
 #include <vector>
 #include <list>
+#include <map>
 #include <thread>
 #include <atomic>
 #include <condition_variable>
@@ -146,6 +147,11 @@ enum PIXEL_TYPE
 	PIXEL_HALF = 0x2592,
 };
 
+struct RenderString
+{
+	SDL_Texture *texture;
+	SDL_Rect distination;
+};
 
 class olcConsoleGameEngine
 {
@@ -180,7 +186,8 @@ public:
 		m_render = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 		if(!m_render)
 			return Error(L"Unable to create render");
-		m_font = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeMono.ttf",fonth);
+		string font{"/usr/share/fonts/truetype/freefont/FreeMono.ttf"};
+		m_font = TTF_OpenFont(font.data(),fonth);
 		if(!m_font)
 			return Error(L"Unable to font");
 		m_nScreenWidth = width*m_cellw;
@@ -229,8 +236,6 @@ public:
 
 	void Fill(int x1, int y1, int x2, int y2, wchar_t in = 0x2588, short col = 0x000F)
 	{
-		int xs=x1*m_cellw,xe=x2*m_cellw;
-		int ys=y1*m_cellh,ye=y2*m_cellh;
 		Clip(x1, y1);
 		Clip(x2, y2);
 		SDL_Color c = g_Colors[col];
@@ -244,24 +249,40 @@ public:
 		string stds{c.begin(), c.end()};
 		SDL_Color color = g_Colors[col];
 		color.a = 255;
-		SDL_Surface *text = TTF_RenderText_Solid(m_font, stds.data(), color);
-		SDL_Texture *tex = SDL_CreateTextureFromSurface(m_render, text);
-		SDL_Rect textBox {x*m_cellw, y*m_cellh, text->w, text->h};
-		SDL_RenderCopy(m_render, tex, NULL, &textBox);
-		SDL_DestroyTexture(tex);
-		SDL_FreeSurface(text);
+		RenderString text;
+		string key = stds + "_COL_" + to_string(col);
+		if(stringCache.count(key) == 0) {
+			SDL_Surface *surface = TTF_RenderText_Solid(m_font, stds.data(), color);
+			text.texture = SDL_CreateTextureFromSurface(m_render, surface);
+			text.distination.w = surface->w;
+			text.distination.h = surface->h;
+            SDL_FreeSurface(surface);
+		    stringCache.insert(make_pair(key, text));
+		}
+		text = stringCache.at(key);
+		text.distination.x = x;
+		text.distination.y = y*m_cellh;
+        m_textBuffer.push_back(text);
 	}
 
 	void DrawStringAlpha(int x, int y, wstring c, short col = 0x0000)
 	{
 		string stds{c.begin(), c.end()};
 		SDL_Color color = g_Colors[col];
-		SDL_Surface *text = TTF_RenderText_Solid(m_font, stds.data(), color);
-		SDL_Texture *tex = SDL_CreateTextureFromSurface(m_render, text);
-		SDL_Rect textBox {x, y*m_cellh, text->w, text->h};
-		SDL_RenderCopy(m_render, tex, NULL, &textBox);
-		SDL_DestroyTexture(tex);
-		SDL_FreeSurface(text);
+		RenderString text;
+		string key = stds + "_COL_" + to_string(col);
+		if(stringCache.count(key) == 0) {
+			SDL_Surface *surface = TTF_RenderText_Solid(m_font, stds.data(), color);
+			text.texture = SDL_CreateTextureFromSurface(m_render, surface);
+			text.distination.w = surface->w;
+			text.distination.h = surface->h;
+            SDL_FreeSurface(surface);
+		    stringCache.insert(make_pair(key, text));
+		}
+		text = stringCache.at(key);
+		text.distination.x = x;
+		text.distination.y = y*m_cellh;
+        m_textBuffer.push_back(text);
 	}
 
 	void Clip(int &x, int &y)
@@ -283,6 +304,10 @@ public:
 
 	~olcConsoleGameEngine()
 	{
+		for(const auto &r : stringCache)
+		{
+			SDL_DestroyTexture(r.second.texture);
+		}
 		SDL_DestroyRenderer(m_render);
 		SDL_DestroyWindow(m_window);
 		TTF_Quit();
@@ -376,9 +401,14 @@ private:
 
 			// Update Title & Present Screen Buffer
 			string title = "OneLoneCoder.com - Console Game Engine - ";
-			string fps = "FPS: " + to_string(1.0f / fElapsedTime);
+			string fps = " FPS: " + to_string(1.0f / fElapsedTime);
 			string appname(m_sAppName.begin(), m_sAppName.end());
 			SDL_SetWindowTitle(m_window,(title + appname + fps).data());
+
+			for(auto && t : m_textBuffer)
+				SDL_RenderCopy(m_render, t.texture, NULL, &t.distination);
+			
+			m_textBuffer.clear();
 			SDL_RenderPresent(m_render);
 		}
 
@@ -421,6 +451,8 @@ private:
 	TTF_Font *m_font;
 	uint8_t m_cellh;
 	uint8_t m_cellw;
+	list<RenderString> m_textBuffer;
+	map<string, RenderString> stringCache;
 /*	HANDLE m_hOriginalConsole;
 	CONSOLE_SCREEN_BUFFER_INFO m_OriginalConsoleInfo;
 	HANDLE m_hConsole;
