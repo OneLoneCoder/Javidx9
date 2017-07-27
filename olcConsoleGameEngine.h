@@ -78,7 +78,14 @@ See my other videos for examples!
 #include <condition_variable>
 using namespace std;
 
-#include <windows.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
+// #include <windows.h>
+
+#define VK_UP SDL_SCANCODE_UP
+#define VK_LEFT SDL_SCANCODE_LEFT
+#define VK_RIGHT SDL_SCANCODE_RIGHT
+#define VK_DOWN SDL_SCANCODE_DOWN
 
 enum COLOUR
 {
@@ -114,6 +121,25 @@ enum COLOUR
 	BG_WHITE		= 0x00F0,
 };
 
+SDL_Color g_Colors[] = { 
+	{0,0,0,0},      // 0
+	{0,0,127,0},    // 1
+	{0,127,0,0},    // 2
+	{0,127,127,0},  // 3
+	{127,0,0,0},    // 4
+	{127,0,127,0},  // 5
+	{127,127,0,0},  // 6
+	{127,127,127,0},// 7
+	{0,0,0,0},
+	{0,0,255,0},    // 9
+	{0,255,0,0},    // A
+	{0,255,255,0},  // B
+	{255,0,0,0},    // C
+	{255,0,255,0},  // D
+	{255,255,0,0},  // E
+	{255,255,255,0},// F
+};
+
 enum PIXEL_TYPE
 {
 	PIXEL_SOLID = 0x2588,
@@ -125,11 +151,14 @@ class olcConsoleGameEngine
 {
 public:
 	olcConsoleGameEngine()
+		: m_window{nullptr}, m_render{nullptr}
 	{
+        SDL_Init(SDL_INIT_EVERYTHING);
+		TTF_Init();
 		m_nScreenWidth = 80;
 		m_nScreenHeight = 30;
 
-		m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		// m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		m_keyNewState = new short[256];
 		m_keyOldState = new short[256];
 		memset(m_keyNewState, 0, 256 * sizeof(short));
@@ -139,14 +168,25 @@ public:
 
 
 		m_sAppName = L"Default";
-
 	}
 
 	int ConstructConsole(int width, int height, int fontw = 12, int fonth = 12)
 	{
-		m_nScreenWidth = width;
-		m_nScreenHeight = height;
+		m_cellw = fontw;
+		m_cellh = fonth;
+		m_window = SDL_CreateWindow((const char*)m_sAppName.data(), SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, width*m_cellw, height*m_cellh, 0);
+		if(!m_window)
+			return Error(L"Unable to create Window");
+		m_render = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+		if(!m_render)
+			return Error(L"Unable to create render");
+		m_font = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeMono.ttf",fonth);
+		if(!m_font)
+			return Error(L"Unable to font");
+		m_nScreenWidth = width*m_cellw;
+		m_nScreenHeight = height*m_cellh;
 
+/*
 		CONSOLE_FONT_INFOEX cfi;
 		cfi.cbSize = sizeof(cfi);
 		cfi.nFont = 0;
@@ -158,7 +198,6 @@ public:
 
 		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
 			return Error(L"SetCurrentConsoleFontEx");
-
 		COORD coordLargest = GetLargestConsoleWindowSize(m_hConsole);
 		if (m_nScreenHeight > coordLargest.Y)
 			return Error(L"Game Height Too Big");
@@ -174,47 +213,55 @@ public:
 			Error(L"SetConsoleWindowInfo");
 
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
+*/
 
 		return 1;
 	}
 
-	void Draw(int x, int y, wchar_t c = 0x2588, short col = 0x000F)
+	void Draw(int x, int y, wchar_t in = 0x2588, short col = 0x000F)
 	{
-		if (x >= 0 && x < m_nScreenWidth && y >= 0 && y < m_nScreenHeight)
-		{
-			m_bufScreen[y * m_nScreenWidth + x].Char.UnicodeChar = c;
-			m_bufScreen[y * m_nScreenWidth + x].Attributes = col;
-		}
+		SDL_Color &c = g_Colors[col];
+		SDL_Rect rect {x,y,4,4};
+		SDL_SetRenderDrawColor(m_render, c.r, c.g, c.b, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawRect(m_render, &rect);
+
 	}
 
-	void Fill(int x1, int y1, int x2, int y2, wchar_t c = 0x2588, short col = 0x000F)
+	void Fill(int x1, int y1, int x2, int y2, wchar_t in = 0x2588, short col = 0x000F)
 	{
+		int xs=x1*m_cellw,xe=x2*m_cellw;
+		int ys=y1*m_cellh,ye=y2*m_cellh;
 		Clip(x1, y1);
 		Clip(x2, y2);
-		for (int x = x1; x < x2; x++)
-			for (int y = y1; y < y2; y++)
-				Draw(x, y, c, col);
+		SDL_Color c = g_Colors[col];
+		SDL_Rect rect {x1,y1,abs(x2-x1),abs(y2-y1)};
+		SDL_SetRenderDrawColor(m_render, c.r, c.g, c.b, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawRect(m_render, &rect);
 	}
 
 	void DrawString(int x, int y, wstring c, short col = 0x000F)
 	{
-		for (size_t i = 0; i < c.size(); i++)
-		{
-			m_bufScreen[y * m_nScreenWidth + x + i].Char.UnicodeChar = c[i];
-			m_bufScreen[y * m_nScreenWidth + x + i].Attributes = col;
-		}
+		string stds{c.begin(), c.end()};
+		SDL_Color color = g_Colors[col];
+		color.a = 255;
+		SDL_Surface *text = TTF_RenderText_Solid(m_font, stds.data(), color);
+		SDL_Texture *tex = SDL_CreateTextureFromSurface(m_render, text);
+		SDL_Rect textBox {x*m_cellw, y*m_cellh, text->w, text->h};
+		SDL_RenderCopy(m_render, tex, NULL, &textBox);
+		SDL_DestroyTexture(tex);
+		SDL_FreeSurface(text);
 	}
 
-	void DrawStringAlpha(int x, int y, wstring c, short col = 0x000F)
+	void DrawStringAlpha(int x, int y, wstring c, short col = 0x0000)
 	{
-		for (size_t i = 0; i < c.size(); i++)
-		{
-			if (c[i] != L' ')
-			{
-				m_bufScreen[y * m_nScreenWidth + x + i].Char.UnicodeChar = c[i];
-				m_bufScreen[y * m_nScreenWidth + x + i].Attributes = col;
-			}
-		}
+		string stds{c.begin(), c.end()};
+		SDL_Color color = g_Colors[col];
+		SDL_Surface *text = TTF_RenderText_Solid(m_font, stds.data(), color);
+		SDL_Texture *tex = SDL_CreateTextureFromSurface(m_render, text);
+		SDL_Rect textBox {x, y*m_cellh, text->w, text->h};
+		SDL_RenderCopy(m_render, tex, NULL, &textBox);
+		SDL_DestroyTexture(tex);
+		SDL_FreeSurface(text);
 	}
 
 	void Clip(int &x, int &y)
@@ -225,85 +272,21 @@ public:
 		if (y >= m_nScreenHeight) y = m_nScreenHeight;
 	}
 
-	void DrawLine(int x1, int y1, int x2, int y2, wchar_t c = 0x2588, short col = 0x000F)
+	void DrawLine(int x1, int y1, int x2, int y2, wchar_t in = 0x2588, short col = 0x000F)
 	{
-		int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
-		dx = x2 - x1;
-		dy = y2 - y1;
-		dx1 = abs(dx);
-		dy1 = abs(dy);
-		px = 2 * dy1 - dx1;
-		py = 2 * dx1 - dy1;
-		if (dy1 <= dx1)
-		{
-			if (dx >= 0)
-			{
-				x = x1;
-				y = y1;
-				xe = x2;
-			}
-			else
-			{
-				x = x2;
-				y = y2;
-				xe = x1;
-			}
-			Draw(x, y, c, col);
-			for (i = 0; x<xe; i++)
-			{
-				x = x + 1;
-				if (px<0)
-					px = px + 2 * dy1;
-				else
-				{
-					if ((dx<0 && dy<0) || (dx>0 && dy>0))
-						y = y + 1;
-					else
-						y = y - 1;
-					px = px + 2 * (dy1 - dx1);
-				}
-				Draw(x, y, c, col);
-			}
-		}
-		else
-		{
-			if (dy >= 0)
-			{
-				x = x1;
-				y = y1;
-				ye = y2;
-			}
-			else
-			{
-				x = x2;
-				y = y2;
-				ye = y1;
-			}
-			Draw(x, y, c, col);
-			for (i = 0; y<ye; i++)
-			{
-				y = y + 1;
-				if (py <= 0)
-					py = py + 2 * dx1;
-				else
-				{
-					if ((dx<0 && dy<0) || (dx>0 && dy>0))
-						x = x + 1;
-					else
-						x = x - 1;
-					py = py + 2 * (dx1 - dy1);
-				}
-				Draw(x, y, c, col);
-			}
-		}
+		SDL_Color &c = g_Colors[col];
+		SDL_SetRenderDrawColor(m_render, c.r, c.g, c.b, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawLine(m_render,x1*m_cellw,y1*m_cellh,x2*m_cellw,y2*m_cellh);
 	}
 
 
 
 	~olcConsoleGameEngine()
 	{
-		SetConsoleActiveScreenBuffer(m_hOriginalConsole);
-		delete[] m_bufScreen;
+		SDL_DestroyRenderer(m_render);
+		SDL_DestroyWindow(m_window);
+		TTF_Quit();
+		SDL_Quit();
 	}
 
 public:
@@ -315,7 +298,8 @@ public:
 		thread t = thread(&olcConsoleGameEngine::GameThread, this);
 
 		// Wait for thread to be exited
-		m_cvGameFinished.wait(unique_lock<mutex>(m_muxGame));
+		unique_lock<mutex> lock1(m_muxGame, defer_lock);
+		m_cvGameFinished.wait(lock1);
 
 		// Tidy up
 		t.join();
@@ -351,16 +335,23 @@ private:
 			float fElapsedTime = elapsedTime.count();
 
 			// Handle Input
-			for (int i = 0; i < 256; i++)
+			SDL_Event e;
+			while(SDL_PollEvent(&e) != 0 ){
+				if(e.type == SDL_QUIT)
+					m_bAtomActive = false;
+			}
+			int numKeys;
+			auto keyNewState = SDL_GetKeyboardState(&numKeys);
+			for (int i = 0; i < 256 && i < numKeys; i++)
 			{
-				m_keyNewState[i] = GetAsyncKeyState(i);
+				m_keyNewState[i] = keyNewState[i];
 				
 				m_keys[i].bPressed = false;
 				m_keys[i].bReleased = false;
 
 				if (m_keyNewState[i] != m_keyOldState[i])
 				{
-					if (m_keyNewState[i] & 0x8000)
+					if (m_keyNewState[i] > 0)
 					{
 						m_keys[i].bPressed = !m_keys[i].bHeld;
 						m_keys[i].bHeld = true;
@@ -379,12 +370,16 @@ private:
 			// Handle Frame Update
 			if (!OnUserUpdate(fElapsedTime))
 				m_bAtomActive = false;
+			
+
+			// swprintf_s(s, 128, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f ", m_sAppName.c_str(), 1.0f / fElapsedTime);
 
 			// Update Title & Present Screen Buffer
-			wchar_t s[128];
-			swprintf_s(s, 128, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f ", m_sAppName.c_str(), 1.0f / fElapsedTime);
-			SetConsoleTitle(s);
-			WriteConsoleOutput(m_hConsole, m_bufScreen, { (short)m_nScreenWidth, (short)m_nScreenHeight }, { 0,0 }, &m_rectWindow);
+			string title = "OneLoneCoder.com - Console Game Engine - ";
+			string fps = "FPS: " + to_string(1.0f / fElapsedTime);
+			string appname(m_sAppName.begin(), m_sAppName.end());
+			SDL_SetWindowTitle(m_window,(title + appname + fps).data());
+			SDL_RenderPresent(m_render);
 		}
 
 		m_cvGameFinished.notify_one();
@@ -399,7 +394,7 @@ public:
 protected:
 	int m_nScreenWidth;
 	int m_nScreenHeight;
-	CHAR_INFO *m_bufScreen;
+//	CHAR_INFO *m_bufScreen;
 	atomic<bool> m_bAtomActive;
 	condition_variable m_cvGameFinished;
 	mutex m_muxGame;
@@ -414,20 +409,22 @@ protected:
 
 
 protected:
-	int Error(wchar_t *msg)
+	int Error(const wchar_t *msg)
 	{
-		wchar_t buf[256];
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
-		SetConsoleActiveScreenBuffer(m_hOriginalConsole);
-		wprintf(L"ERROR: %s\n\t%s\n", msg, buf);
+		cerr << "ERROR: " << msg << '\n' << SDL_GetError() << '\n';
 		return -1;
 	}
 
 private:
-	HANDLE m_hOriginalConsole;
+    SDL_Window *m_window;
+    SDL_Renderer *m_render;
+	TTF_Font *m_font;
+	uint8_t m_cellh;
+	uint8_t m_cellw;
+/*	HANDLE m_hOriginalConsole;
 	CONSOLE_SCREEN_BUFFER_INFO m_OriginalConsoleInfo;
 	HANDLE m_hConsole;
-	SMALL_RECT m_rectWindow;
+	SMALL_RECT m_rectWindow; */
 	short *m_keyOldState;
 	short *m_keyNewState;
 };
