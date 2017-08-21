@@ -27,7 +27,7 @@ Video:
 ~~~~~~
 https://youtu.be/cWc0hgYwZyc
 
-Last Updated: 10/07/2017
+Last Updated: 21/08/2017
 
 Usage:
 ~~~~~~
@@ -117,9 +117,124 @@ enum COLOUR
 enum PIXEL_TYPE
 {
 	PIXEL_SOLID = 0x2588,
-	PIXEL_THREEQUARTERS = 0x2593
+	PIXEL_THREEQUARTERS = 0x2593,
 	PIXEL_HALF = 0x2592,
 	PIXEL_QUARTER = 0x2591,
+};
+
+class olcSprite
+{
+public:
+	olcSprite()
+	{
+
+	}
+
+	olcSprite(int w, int h)
+	{
+		Create(w, h);
+	}
+
+	olcSprite(wstring sFile)
+	{
+		if (!Load(sFile))
+			Create(8, 8);
+	}
+
+	int nWidth = 0;
+	int nHeight = 0;
+
+private:
+	wchar_t *m_Glyphs = nullptr;
+	short *m_Colours = nullptr;
+
+	void Create(int w, int h)
+	{
+		nWidth = w;
+		nHeight = h;
+		m_Glyphs = new wchar_t[w*h];
+		m_Colours = new short[w*h];
+		for (int i = 0; i < w*h; i++)
+		{
+			m_Glyphs[i] = L' ';
+			m_Colours[i] = FG_BLACK;
+		}
+	}
+
+public:
+	void SetGlyph(int x, int y, wchar_t c)
+	{
+		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+			return;
+		else
+			m_Glyphs[y * nWidth + x] = c;
+	}
+
+	void SetColour(int x, int y, short c)
+	{
+		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+			return;
+		else
+			m_Colours[y * nWidth + x] = c;
+	}
+
+	wchar_t GetGlyph(int x, int y)
+	{
+		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+			return L' ';
+		else
+			return m_Glyphs[y * nWidth + x];
+	}
+
+	short GetColour(int x, int y)
+	{
+		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+			return FG_BLACK;
+		else
+			return m_Colours[y * nWidth + x];
+	}
+
+	bool Save(wstring sFile)
+	{
+		FILE *f = nullptr;
+		_wfopen_s(&f, sFile.c_str(), L"wb");
+		if (f == nullptr)
+			return false;
+
+		fwrite(&nWidth, sizeof(int), 1, f);
+		fwrite(&nHeight, sizeof(int), 1, f);
+		fwrite(m_Colours, sizeof(short), nWidth * nHeight, f);
+		fwrite(m_Glyphs, sizeof(wchar_t), nWidth * nHeight, f);
+
+		fclose(f);
+
+		return true;
+	}
+
+	bool Load(wstring sFile)
+	{
+		delete[] m_Glyphs;
+		delete[] m_Colours;
+		nWidth = 0;
+		nHeight = 0;
+
+		FILE *f = nullptr;
+		_wfopen_s(&f, sFile.c_str(), L"rb");
+		if (f == nullptr)
+			return false;
+
+		fread(&nWidth, sizeof(int), 1, f);
+		fread(&nHeight, sizeof(int), 1, f);
+
+		Create(nWidth, nHeight);
+
+		fread(m_Colours, sizeof(short), nWidth * nHeight, f);
+		fread(m_Glyphs, sizeof(wchar_t), nWidth * nHeight, f);
+
+		fclose(f);
+		return true;
+	}
+
 };
 
 
@@ -296,6 +411,36 @@ public:
 					py = py + 2 * (dx1 - dy1);
 				}
 				Draw(x, y, c, col);
+			}
+		}
+	}
+
+	void DrawSprite(int x, int y, olcSprite *sprite)
+	{
+		if (sprite == nullptr)
+			return;
+
+		for (int i = 0; i < sprite->nWidth; i++)
+		{
+			for (int j = 0; j < sprite->nHeight; j++)
+			{
+				if (sprite->GetGlyph(i, j) != L' ')
+					Draw(x + i, y + j, sprite->GetGlyph(i, j), sprite->GetColour(i, j));
+			}
+		}
+	}
+
+	void DrawPartialSprite(int x, int y, olcSprite *sprite, int ox, int oy, int w, int h)
+	{
+		if (sprite == nullptr)
+			return;
+
+		for (int i = 0; i < w; i++)
+		{
+			for (int j = 0; j < h; j++)
+			{
+				if (sprite->GetGlyph(i+ox, j+oy) != L' ')
+					Draw(x + i, y + j, sprite->GetGlyph(i+ox, j+oy), sprite->GetColour(i+ox, j+oy));
 			}
 		}
 	}
