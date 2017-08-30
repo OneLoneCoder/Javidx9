@@ -26,8 +26,10 @@ Blog: www.onelonecoder.com
 Video:
 ~~~~~~
 https://youtu.be/cWc0hgYwZyc
+Added mouse support: https://youtu.be/tdqc9hZhHxM
+Last Updated: 30/08/2017
 
-Last Updated: 21/08/2017
+
 
 Usage:
 ~~~~~~
@@ -56,7 +58,8 @@ the application to close.
 Input is also handled for you - interrogate the m_keys[] array with the virtual
 keycode you want to know about. bPressed is set for the frame the key is pressed down
 in, bHeld is set if the key is held down, bReleased is set for the frame the key
-is released in.
+is released in. The same applies to mouse! m_mousePosX and Y can be used to get
+the current cursor position, and m_mouse[1..5] returns the mouse buttons.
 
 The draw routines treat characters like pixels. By default they are set to white solid
 blocks - but you can draw any unicode character, using any of the colours listed below.
@@ -247,12 +250,16 @@ public:
 		m_nScreenHeight = 30;
 
 		m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		m_hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
 		m_keyNewState = new short[256];
 		m_keyOldState = new short[256];
 		memset(m_keyNewState, 0, 256 * sizeof(short));
 		memset(m_keyOldState, 0, 256 * sizeof(short));
 
 		memset(m_keys, 0, 256 * sizeof(sKeyState));
+
+		m_mousePosX = 0;
+		m_mousePosY = 0;
 
 
 		m_sAppName = L"Default";
@@ -273,6 +280,8 @@ public:
 		cfi.FontWeight = FW_NORMAL;
 		wcscpy_s(cfi.FaceName, L"Consolas");
 
+		
+
 		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
 			return Error(L"SetCurrentConsoleFontEx");
 
@@ -289,6 +298,11 @@ public:
 		m_rectWindow = { 0, 0, (short)m_nScreenWidth - 1, (short)m_nScreenHeight - 1 };
 		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
 			Error(L"SetConsoleWindowInfo");
+
+
+		// Set flags to allow mouse input		
+		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+			Error(L"SetConsoleMode");
 
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
 
@@ -497,7 +511,7 @@ private:
 			tp1 = tp2;
 			float fElapsedTime = elapsedTime.count();
 
-			// Handle Input
+			// Handle Keyboard Input
 			for (int i = 0; i < 256; i++)
 			{
 				m_keyNewState[i] = GetAsyncKeyState(i);
@@ -522,6 +536,76 @@ private:
 				m_keyOldState[i] = m_keyNewState[i];
 			}
 
+			// Handle Mouse Input - Check for window events
+			INPUT_RECORD inBuf[32];
+			DWORD events = 0;
+			GetNumberOfConsoleInputEvents(m_hConsoleIn, &events);
+			if(events > 0)
+				ReadConsoleInput(m_hConsoleIn, inBuf, events, &events);
+
+			// Handle events - we only care about mouse clicks and movement
+			// for now
+			for (DWORD i = 0; i < events; i++)
+			{
+				switch (inBuf[i].EventType)
+				{
+					case MOUSE_EVENT:
+					{
+						switch (inBuf[i].Event.MouseEvent.dwEventFlags)
+						{
+							case MOUSE_MOVED:
+							{
+								m_mousePosX = inBuf[i].Event.MouseEvent.dwMousePosition.X;
+								m_mousePosY = inBuf[i].Event.MouseEvent.dwMousePosition.Y;
+							}
+							break;
+
+							case 0:
+							{
+								for (int m = 0; m < 5; m++)
+									m_mouseNewState[m] = (inBuf[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
+			
+							}
+							break;
+
+							default:
+								break;
+						}
+
+						
+						
+						
+					}
+					break;
+
+					default:
+						break;
+						// We don't care just at the moment
+				}
+			}
+
+			for (int m = 0; m < 5; m++)
+			{
+				m_mouse[m].bPressed = false;
+				m_mouse[m].bReleased = false;
+
+				if (m_mouseNewState[m] != m_mouseOldState[m])
+				{
+					if (m_mouseNewState[m])
+					{
+						m_mouse[m].bPressed = true;
+						m_mouse[m].bHeld = true;
+					}
+					else
+					{
+						m_mouse[m].bReleased = true;
+						m_mouse[m].bHeld = false;
+					}
+				}
+
+				m_mouseOldState[m] = m_mouseNewState[m];
+			}
+
 
 			// Handle Frame Update
 			if (!OnUserUpdate(fElapsedTime))
@@ -529,7 +613,7 @@ private:
 
 			// Update Title & Present Screen Buffer
 			wchar_t s[128];
-			swprintf_s(s, 128, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f ", m_sAppName.c_str(), 1.0f / fElapsedTime);
+			swprintf_s(s, 128, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f - %d ", m_sAppName.c_str(), 1.0f / fElapsedTime, events);
 			SetConsoleTitle(s);
 			WriteConsoleOutput(m_hConsole, m_bufScreen, { (short)m_nScreenWidth, (short)m_nScreenHeight }, { 0,0 }, &m_rectWindow);
 		}
@@ -557,7 +641,10 @@ protected:
 		bool bPressed;
 		bool bReleased;
 		bool bHeld;
-	} m_keys[256];
+	} m_keys[256], m_mouse[5];
+
+	int m_mousePosX;
+	int m_mousePosY;
 
 
 protected:
@@ -574,7 +661,10 @@ private:
 	HANDLE m_hOriginalConsole;
 	CONSOLE_SCREEN_BUFFER_INFO m_OriginalConsoleInfo;
 	HANDLE m_hConsole;
+	HANDLE m_hConsoleIn;
 	SMALL_RECT m_rectWindow;
 	short *m_keyOldState;
 	short *m_keyNewState;
+	bool m_mouseOldState[5];
+	bool m_mouseNewState[5];
 };
