@@ -309,7 +309,7 @@ public:
 		return 1;
 	}
 
-	void Draw(int x, int y, wchar_t c = 0x2588, short col = 0x000F)
+	virtual void Draw(int x, int y, wchar_t c = 0x2588, short col = 0x000F)
 	{
 		if (x >= 0 && x < m_nScreenWidth && y >= 0 && y < m_nScreenHeight)
 		{
