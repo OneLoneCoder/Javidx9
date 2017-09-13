@@ -293,16 +293,16 @@ public:
 
 		COORD buffer = { (short)m_nScreenWidth, (short)m_nScreenHeight };
 		if (!SetConsoleScreenBufferSize(m_hConsole, buffer))
-			Error(L"SetConsoleScreenBufferSize");
+			return Error(L"SetConsoleScreenBufferSize");
 
 		m_rectWindow = { 0, 0, (short)m_nScreenWidth - 1, (short)m_nScreenHeight - 1 };
 		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
-			Error(L"SetConsoleWindowInfo");
+			return Error(L"SetConsoleWindowInfo");
 
 
 		// Set flags to allow mouse input		
 		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
-			Error(L"SetConsoleMode");
+			return Error(L"SetConsoleMode");
 
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
 
