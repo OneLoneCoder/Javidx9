@@ -20,16 +20,22 @@ each time, so this class wraps that up.
 
 Author
 ~~~~~~
-Twitter: @javidx9
-Blog: www.onelonecoder.com
+Twitter: @javidx9 http://twitter.com/javidx9
+Blog: http://www.onelonecoder.com
+YouTube: http://www.youtube.com/javidx9
 
-Video:
+Videos:
 ~~~~~~
-https://youtu.be/cWc0hgYwZyc
-Added mouse support: https://youtu.be/tdqc9hZhHxM
-Last Updated: 30/08/2017
+Original:				https://youtu.be/cWc0hgYwZyc
+Added mouse support:	https://youtu.be/tdqc9hZhHxM
+Beginners Guide:		https://youtu.be/u5BhrA8ED0o
 
+Shout Outs!
+~~~~~~~~~~~
+Thanks to cool people who helped with testing, bug-finding and fixing!
+	YouTube: 	wowLinh, JavaJack59
 
+Last Updated: 13/09/2017
 
 Usage:
 ~~~~~~
@@ -67,6 +73,7 @@ blocks - but you can draw any unicode character, using any of the colours listed
 There may be bugs! 
 
 See my other videos for examples!
+http://www.youtube.com/javidx9
 
 */
 
@@ -92,7 +99,8 @@ enum COLOUR
 	FG_DARK_RED     = 0x0004,
 	FG_DARK_MAGENTA = 0x0005,
 	FG_DARK_YELLOW  = 0x0006,
-	FG_GREY         = 0x0007,
+	FG_GREY			= 0x0007, // Thanks MS :-/
+	FG_DARK_GREY    = 0x0008,
 	FG_BLUE			= 0x0009,
 	FG_GREEN		= 0x000A,
 	FG_CYAN			= 0x000B,
@@ -108,6 +116,7 @@ enum COLOUR
 	BG_DARK_MAGENTA = 0x0050,
 	BG_DARK_YELLOW	= 0x0060,
 	BG_GREY			= 0x0070,
+	BG_DARK_GREY	= 0x0080,
 	BG_BLUE			= 0x0090,
 	BG_GREEN		= 0x00A0,
 	BG_CYAN			= 0x00B0,
@@ -251,22 +260,24 @@ public:
 
 		m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		m_hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
+
 		m_keyNewState = new short[256];
 		m_keyOldState = new short[256];
 		memset(m_keyNewState, 0, 256 * sizeof(short));
 		memset(m_keyOldState, 0, 256 * sizeof(short));
-
 		memset(m_keys, 0, 256 * sizeof(sKeyState));
 
 		m_mousePosX = 0;
 		m_mousePosY = 0;
 
-
 		m_sAppName = L"Default";
-
 	}
 
-	int ConstructConsole(int width, int height, int fontw = 12, int fonth = 12)
+	// Update 14/09/2017 - Below is the original implementation of CreateConsole(). This works
+	// on many, but not all systems. A revised version is used below. This will be removed 
+	// once it is established the revision is stable. Jx9
+
+	/*int ConstructConsole(int width, int height, int fontw = 12, int fonth = 12)
 	{
 		m_nScreenWidth = width;
 		m_nScreenHeight = height;
@@ -279,8 +290,6 @@ public:
 		cfi.FontFamily = FF_DONTCARE;
 		cfi.FontWeight = FW_NORMAL;
 		wcscpy_s(cfi.FaceName, L"Consolas");
-
-		
 
 		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
 			return Error(L"SetCurrentConsoleFontEx");
@@ -299,12 +308,83 @@ public:
 		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
 			Error(L"SetConsoleWindowInfo");
 
+		// Set flags to allow mouse input		
+		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+			return Error(L"SetConsoleMode");
+
+		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
+
+		return 1;
+	}*/
+
+	int olcConsoleGameEngine::ConstructConsole(int width, int height, int fontw, int fonth)
+	{
+		if (m_hConsole == INVALID_HANDLE_VALUE)
+			return Error(L"Bad Handle");
+
+		m_nScreenWidth = width;
+		m_nScreenHeight = height;
+
+		// Update 13/09/2017 - It seems that the console behaves differently on some systems
+		// and I'm unsure why this is. It could be to do with windows default settings, or
+		// screen resolutions, or system languages. Unfortunately, MSDN does not offer much
+		// by way of useful information, and so the resulting sequence is the reult of experiment
+		// that seems to work in multiple cases.
+		//
+		// The problem seems to be that the SetConsoleXXX functions are somewhat circular and 
+		// fail depending on the state of the current console properties, i.e. you can't set
+		// the buffer size until you set the screen size, but you can't change the screen size
+		// until the buffer size is correct. This coupled with a precise ordering of calls
+		// makes this procedure seem a little mystical :-P. Thanks to wowLinh for helping - Jx9
+
+		// Change console visual size to a minimum so ScreenBuffer can shrink
+		// below the actual visual size
+		m_rectWindow = { 0, 0, 1, 1 };
+		SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow);
+
+		// Set the size of the screen buffer
+		COORD coord = { (short)m_nScreenWidth, (short)m_nScreenHeight };
+		if (!SetConsoleScreenBufferSize(m_hConsole, coord))
+			Error(L"SetConsoleScreenBufferSize");
+
+		// Assign screen buffer to the console
+		if (!SetConsoleActiveScreenBuffer(m_hConsole))
+			return Error(L"SetConsoleActiveScreenBuffer");
+		
+		// Set the font size now that the screen buffer has been assigned to the console
+		CONSOLE_FONT_INFOEX cfi;
+		cfi.cbSize = sizeof(cfi);
+		cfi.nFont = 0;
+		cfi.dwFontSize.X = fontw;
+		cfi.dwFontSize.Y = fonth;
+		cfi.FontFamily = FF_DONTCARE;
+		cfi.FontWeight = FW_NORMAL;
+		wcscpy_s(cfi.FaceName, L"Consolas");
+		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
+			return Error(L"SetCurrentConsoleFontEx");
+
+		// Get screen buffer info and check the maximum allowed window size. Return
+		// error if exceeded, so user knows their dimensions/fontsize are too large
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		if (!GetConsoleScreenBufferInfo(m_hConsole, &csbi))
+			return Error(L"GetConsoleScreenBufferInfo");
+		if (m_nScreenHeight > csbi.dwMaximumWindowSize.Y)
+			return Error(L"Screen Height / Font Height Too Big");
+		if (m_nScreenWidth > csbi.dwMaximumWindowSize.X)
+			return Error(L"Screen Width / Font Width Too Big");
+
+		// Set Physical Console Window Size
+		m_rectWindow = { 0, 0, (short)m_nScreenWidth - 1, (short)m_nScreenHeight - 1 };
+		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
+			return Error(L"SetConsoleWindowInfo");
 
 		// Set flags to allow mouse input		
 		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
 			Error(L"SetConsoleMode");
 
+		// Allocate memory for screen buffer
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
+		memset(m_bufScreen, 0, sizeof(CHAR_INFO) * m_nScreenWidth * m_nScreenHeight);
 
 		return 1;
 	}
@@ -459,7 +539,45 @@ public:
 		}
 	}
 
+	void DrawWireFrameModel(const vector<pair<float, float>> &vecModelCoordinates, float x, float y, float r = 0.0f, float s = 1.0f, short col = FG_WHITE)
+	{
+		// pair.first = x coordinate
+		// pair.second = y coordinate
 
+		// Create translated model vector of coordinate pairs
+		vector<pair<float, float>> vecTransformedCoordinates;
+		int verts = vecModelCoordinates.size();
+		vecTransformedCoordinates.resize(verts);
+
+		// Rotate
+		for (int i = 0; i < verts; i++)
+		{
+			vecTransformedCoordinates[i].first = vecModelCoordinates[i].first * cosf(r) - vecModelCoordinates[i].second * sinf(r);
+			vecTransformedCoordinates[i].second = vecModelCoordinates[i].first * sinf(r) + vecModelCoordinates[i].second * cosf(r);
+		}
+
+		// Scale
+		for (int i = 0; i < verts; i++)
+		{
+			vecTransformedCoordinates[i].first = vecTransformedCoordinates[i].first * s;
+			vecTransformedCoordinates[i].second = vecTransformedCoordinates[i].second * s;
+		}
+
+		// Translate
+		for (int i = 0; i < verts; i++)
+		{
+			vecTransformedCoordinates[i].first = vecTransformedCoordinates[i].first + x;
+			vecTransformedCoordinates[i].second = vecTransformedCoordinates[i].second + y;
+		}
+
+		// Draw Closed Polygon
+		for (int i = 0; i < verts + 1; i++)
+		{
+			int j = (i + 1);
+			DrawLine((int)vecTransformedCoordinates[i % verts].first, (int)vecTransformedCoordinates[i % verts].second,
+				(int)vecTransformedCoordinates[j % verts].first, (int)vecTransformedCoordinates[j % verts].second, PIXEL_SOLID, col);
+		}
+	}
 
 	~olcConsoleGameEngine()
 	{
@@ -497,7 +615,7 @@ private:
 	{
 		// Create user resources as part of this thread
 		if (!OnUserCreate())
-			return;
+			m_bAtomActive = false;
 
 		auto tp1 = chrono::system_clock::now();
 		auto tp2 = chrono::system_clock::now();
@@ -570,11 +688,7 @@ private:
 
 							default:
 								break;
-						}
-
-						
-						
-						
+						}																	
 					}
 					break;
 
