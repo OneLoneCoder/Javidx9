@@ -13,7 +13,7 @@ Cheers!
 
 Background
 ~~~~~~~~~~
-Often as an exercide, I'll try to right code where every byte of source code
+Often as an exercise, I'll try to write code where every byte of source code
 should count. I feel that this is an excellent way to practice logic, code
 comprehension and smarmy arrogance.
 
