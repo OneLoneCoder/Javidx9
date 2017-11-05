@@ -206,6 +206,26 @@ public:
 			return m_Colours[y * nWidth + x];
 	}
 
+	wchar_t SampleGlyph(float x, float y)
+	{
+		int sx = x * (float)nWidth;
+		int sy = y * (float)nHeight-1;
+		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
+			return L' ';
+		else
+			return m_Glyphs[sy * nWidth + sx];
+	}
+
+	short SampleColour(float x, float y)
+	{
+		int sx = x * (float)nWidth;
+		int sy = y * (float)nHeight-1;
+		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
+			return FG_BLACK;
+		else
+			return m_Colours[sy * nWidth + sx];
+	}
+
 	bool Save(wstring sFile)
 	{
 		FILE *f = nullptr;
@@ -302,11 +322,11 @@ public:
 
 		COORD buffer = { (short)m_nScreenWidth, (short)m_nScreenHeight };
 		if (!SetConsoleScreenBufferSize(m_hConsole, buffer))
-			Error(L"SetConsoleScreenBufferSize");
+			return Error(L"SetConsoleScreenBufferSize");
 
 		m_rectWindow = { 0, 0, (short)m_nScreenWidth - 1, (short)m_nScreenHeight - 1 };
 		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
-			Error(L"SetConsoleWindowInfo");
+			return Error(L"SetConsoleWindowInfo");
 
 		// Set flags to allow mouse input		
 		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
@@ -380,7 +400,7 @@ public:
 
 		// Set flags to allow mouse input		
 		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
-			Error(L"SetConsoleMode");
+			return Error(L"SetConsoleMode");
 
 		// Allocate memory for screen buffer
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
@@ -726,8 +746,8 @@ private:
 				m_bAtomActive = false;
 
 			// Update Title & Present Screen Buffer
-			wchar_t s[128];
-			swprintf_s(s, 128, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f - %d ", m_sAppName.c_str(), 1.0f / fElapsedTime, events);
+			wchar_t s[256];
+			swprintf_s(s, 256, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f - %d ", m_sAppName.c_str(), 1.0f / fElapsedTime, events);
 			SetConsoleTitle(s);
 			WriteConsoleOutput(m_hConsole, m_bufScreen, { (short)m_nScreenWidth, (short)m_nScreenHeight }, { 0,0 }, &m_rectWindow);
 		}
