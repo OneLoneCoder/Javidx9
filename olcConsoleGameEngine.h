@@ -35,7 +35,7 @@ Shout Outs!
 Thanks to cool people who helped with testing, bug-finding and fixing!
 	YouTube: 	wowLinh, JavaJack59
 
-Last Updated: 13/09/2017
+Last Updated: 05/11/2017
 
 Usage:
 ~~~~~~
