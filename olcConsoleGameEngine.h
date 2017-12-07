@@ -33,9 +33,9 @@ Beginners Guide:		https://youtu.be/u5BhrA8ED0o
 Shout Outs!
 ~~~~~~~~~~~
 Thanks to cool people who helped with testing, bug-finding and fixing!
-	YouTube: 	wowLinh, JavaJack59
+	YouTube: 	wowLinh, JavaJack59, idkwid
 
-Last Updated: 05/11/2017
+Last Updated: 07/12/2017
 
 Usage:
 ~~~~~~
@@ -75,9 +75,24 @@ There may be bugs!
 See my other videos for examples!
 http://www.youtube.com/javidx9
 
+Lots of programs to try:
+http://www.github.com/OneLoneCoder/videos
+
+Chat on the Discord server:
+https://discord.gg/WhwHUMV
+
+Be bored by Twitch:
+http://www.twitch.tv/javidx9
+
 */
 
 #pragma once
+
+#ifndef UNICODE
+#error Please enable UNICODE for your compiler! VS: Project Properties -> General -> \
+Character Set -> Use Unicode. In Code::Blocks, include 'UNICODE' and '_UNICODE' as \
+pre-processor directives. Thanks! - Javidx9
+#endif
 
 #include <iostream>
 #include <chrono>
@@ -208,8 +223,8 @@ public:
 
 	wchar_t SampleGlyph(float x, float y)
 	{
-		int sx = x * (float)nWidth;
-		int sy = y * (float)nHeight-1;
+		int sx = (int)(x * (float)nWidth);
+		int sy = (int)(y * (float)nHeight-1.0f);
 		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
 			return L' ';
 		else
@@ -218,8 +233,8 @@ public:
 
 	short SampleColour(float x, float y)
 	{
-		int sx = x * (float)nWidth;
-		int sy = y * (float)nHeight-1;
+		int sx = (int)(x * (float)nWidth);
+		int sy = (int)(y * (float)nHeight-1.0f);
 		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
 			return FG_BLACK;
 		else
@@ -293,51 +308,7 @@ public:
 		m_sAppName = L"Default";
 	}
 
-	// Update 14/09/2017 - Below is the original implementation of CreateConsole(). This works
-	// on many, but not all systems. A revised version is used below. This will be removed 
-	// once it is established the revision is stable. Jx9
-
-	/*int ConstructConsole(int width, int height, int fontw = 12, int fonth = 12)
-	{
-		m_nScreenWidth = width;
-		m_nScreenHeight = height;
-
-		CONSOLE_FONT_INFOEX cfi;
-		cfi.cbSize = sizeof(cfi);
-		cfi.nFont = 0;
-		cfi.dwFontSize.X = fontw;
-		cfi.dwFontSize.Y = fonth;
-		cfi.FontFamily = FF_DONTCARE;
-		cfi.FontWeight = FW_NORMAL;
-		wcscpy_s(cfi.FaceName, L"Consolas");
-
-		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
-			return Error(L"SetCurrentConsoleFontEx");
-
-		COORD coordLargest = GetLargestConsoleWindowSize(m_hConsole);
-		if (m_nScreenHeight > coordLargest.Y)
-			return Error(L"Game Height Too Big");
-		if (m_nScreenWidth > coordLargest.X)
-			return Error(L"Game Width Too Big");
-
-		COORD buffer = { (short)m_nScreenWidth, (short)m_nScreenHeight };
-		if (!SetConsoleScreenBufferSize(m_hConsole, buffer))
-			return Error(L"SetConsoleScreenBufferSize");
-
-		m_rectWindow = { 0, 0, (short)m_nScreenWidth - 1, (short)m_nScreenHeight - 1 };
-		if (!SetConsoleWindowInfo(m_hConsole, TRUE, &m_rectWindow))
-			return Error(L"SetConsoleWindowInfo");
-
-		// Set flags to allow mouse input		
-		if (!SetConsoleMode(m_hConsoleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
-			return Error(L"SetConsoleMode");
-
-		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
-
-		return 1;
-	}*/
-
-	int olcConsoleGameEngine::ConstructConsole(int width, int height, int fontw, int fonth)
+	int ConstructConsole(int width, int height, int fontw, int fonth)
 	{
 		if (m_hConsole == INVALID_HANDLE_VALUE)
 			return Error(L"Bad Handle");
@@ -614,7 +585,8 @@ public:
 		thread t = thread(&olcConsoleGameEngine::GameThread, this);
 
 		// Wait for thread to be exited
-		m_cvGameFinished.wait(unique_lock<mutex>(m_muxGame));
+		unique_lock<mutex> ul(m_muxGame);
+		m_cvGameFinished.wait(ul);
 
 		// Tidy up
 		t.join();
@@ -782,7 +754,7 @@ protected:
 
 
 protected:
-	int Error(wchar_t *msg)
+	int Error(const wchar_t *msg)
 	{
 		wchar_t buf[256];
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
