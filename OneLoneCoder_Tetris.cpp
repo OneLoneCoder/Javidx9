@@ -243,7 +243,7 @@ int main()
 		if (!vLines.empty())
 		{
 			// Display Frame (cheekily to draw lines)
-			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+			WriteConsoleOutputCharacterW(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 			this_thread::sleep_for(400ms); // Delay a bit
 
 			for (auto &v : vLines)
@@ -258,7 +258,7 @@ int main()
 		}
 
 		// Display Frame
-		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+		WriteConsoleOutputCharacterW(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 	}
 
 	// Oh Dear
