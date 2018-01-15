@@ -43,8 +43,19 @@
 #include <Windows.h>
 using namespace std;
 
+// If the display looks weird, you might need to make some adjustments
+// to the values below or to your Command Prompt settings.
+// Do the following:
+// 1) Start the game
+// 2) In Command Prompt, right-click on the title bar and select Properties
+// 3) Click on the Layout tab
+// 4) Check the Windows Size Width and Height
+// 5) If they don't match, you have two options:
+//      -Adjust the Command Prompt settings and hit OK
+//      -Adjust the Width and Height values below to match and rebuild the program
 int nScreenWidth = 80;			// Console Screen Size X (columns)
 int nScreenHeight = 30;			// Console Screen Size Y (rows)
+
 wstring tetromino[7];
 int nFieldWidth = 12;
 int nFieldHeight = 18;
