@@ -90,8 +90,7 @@ http://www.twitch.tv/javidx9
 
 #ifndef UNICODE
 #error Please enable UNICODE for your compiler! VS: Project Properties -> General -> \
-Character Set -> Use Unicode. In Code::Blocks, include 'UNICODE' and '_UNICODE' as \
-pre-processor directives. Thanks! - Javidx9
+Character Set -> Use Unicode. Thanks! - Javidx9
 #endif
 
 #include <iostream>
@@ -104,6 +103,7 @@ pre-processor directives. Thanks! - Javidx9
 using namespace std;
 
 #include <windows.h>
+
 
 enum COLOUR
 {
@@ -500,6 +500,28 @@ public:
 		}
 	}
 
+	void DrawCircle(int xc, int yc, int r, wchar_t c = 0x2588, short col = 0x000F)
+	{
+		int x = 0;
+		int y = r;
+		int p = 3 - 2 * r;
+		if (!r) return;
+
+		while (y >= x) // only formulate 1/8 of circle
+		{
+			Draw(xc - x, yc - y, c, col);//upper left left
+			Draw(xc - y, yc - x, c, col);//upper upper left
+			Draw(xc + y, yc - x, c, col);//upper upper right
+			Draw(xc + x, yc - y, c, col);//upper right right
+			Draw(xc - x, yc + y, c, col);//lower left left
+			Draw(xc - y, yc + x, c, col);//lower lower left
+			Draw(xc + y, yc + x, c, col);//lower lower right
+			Draw(xc + x, yc + y, c, col);//lower right right
+			if (p < 0) p += 4 * x++ + 6;
+			else p += 4 * (x++ - y--) + 10;
+		}
+	}
+
 	void DrawSprite(int x, int y, olcSprite *sprite)
 	{
 		if (sprite == nullptr)
@@ -751,6 +773,13 @@ protected:
 
 	int m_mousePosX;
 	int m_mousePosY;
+
+public:
+	sKeyState GetKey(int nKeyID)
+	{
+		return m_keys[nKeyID];
+	}
+
 
 
 protected:
