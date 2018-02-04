@@ -33,9 +33,9 @@ Beginners Guide:		https://youtu.be/u5BhrA8ED0o
 Shout Outs!
 ~~~~~~~~~~~
 Thanks to cool people who helped with testing, bug-finding and fixing!
-	YouTube: 	wowLinh, JavaJack59, idkwid
+	YouTube: 	wowLinh, JavaJack59, idkwid, kingtatgi
 
-Last Updated: 07/12/2017
+Last Updated: 04/02/2018
 
 Usage:
 ~~~~~~
@@ -191,7 +191,7 @@ private:
 public:
 	void SetGlyph(int x, int y, wchar_t c)
 	{
-		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+		if (x <0 || x >= nWidth || y < 0 || y >= nHeight)
 			return;
 		else
 			m_Glyphs[y * nWidth + x] = c;
@@ -199,7 +199,7 @@ public:
 
 	void SetColour(int x, int y, short c)
 	{
-		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+		if (x <0 || x >= nWidth || y < 0 || y >= nHeight)
 			return;
 		else
 			m_Colours[y * nWidth + x] = c;
@@ -207,7 +207,7 @@ public:
 
 	wchar_t GetGlyph(int x, int y)
 	{
-		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+		if (x <0 || x >= nWidth || y < 0 || y >= nHeight)
 			return L' ';
 		else
 			return m_Glyphs[y * nWidth + x];
@@ -215,7 +215,7 @@ public:
 
 	short GetColour(int x, int y)
 	{
-		if (x <0 || x > nWidth || y < 0 || y > nHeight)
+		if (x <0 || x >= nWidth || y < 0 || y >= nHeight)
 			return FG_BLACK;
 		else
 			return m_Colours[y * nWidth + x];
@@ -225,7 +225,7 @@ public:
 	{
 		int sx = (int)(x * (float)nWidth);
 		int sy = (int)(y * (float)nHeight-1.0f);
-		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
+		if (sx <0 || sx >= nWidth || sy < 0 || sy >= nHeight)
 			return L' ';
 		else
 			return m_Glyphs[sy * nWidth + sx];
@@ -235,7 +235,7 @@ public:
 	{
 		int sx = (int)(x * (float)nWidth);
 		int sy = (int)(y * (float)nHeight-1.0f);
-		if (sx <0 || sx > nWidth || sy < 0 || sy > nHeight)
+		if (sx <0 || sx >= nWidth || sy < 0 || sy >= nHeight)
 			return FG_BLACK;
 		else
 			return m_Colours[sy * nWidth + sx];
@@ -296,12 +296,9 @@ public:
 		m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		m_hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
 
-		m_keyNewState = new short[256];
-		m_keyOldState = new short[256];
 		memset(m_keyNewState, 0, 256 * sizeof(short));
 		memset(m_keyOldState, 0, 256 * sizeof(short));
 		memset(m_keys, 0, 256 * sizeof(sKeyState));
-
 		m_mousePosX = 0;
 		m_mousePosY = 0;
 
@@ -350,6 +347,7 @@ public:
 		cfi.dwFontSize.Y = fonth;
 		cfi.FontFamily = FF_DONTCARE;
 		cfi.FontWeight = FW_NORMAL;
+		//wcscpy_s(cfi.FaceName, L"Liberation Mono");
 		wcscpy_s(cfi.FaceName, L"Consolas");
 		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
 			return Error(L"SetCurrentConsoleFontEx");
@@ -522,6 +520,32 @@ public:
 		}
 	}
 
+	void FillCircle(int xc, int yc, int r, wchar_t c = 0x2588, short col = 0x000F)
+	{
+		// Taken from wikipedia
+		int x = 0;
+		int y = r;
+		int p = 3 - 2 * r;
+		if (!r) return;
+
+		auto drawline = [&](int sx, int ex, int ny)
+		{
+			for (int i = sx; i < ex; i++)
+				Draw(i, ny, c, col);
+		};
+
+		while (y >= x)
+		{
+			// Modified to draw scan-lines instead of edges
+			drawline(xc - x, xc + x, yc - y);
+			drawline(xc - y, xc + y, yc - x);
+			drawline(xc - x, xc + x, yc + y);
+			drawline(xc - y, xc + y, yc + x);
+			if (p < 0) p += 4 * x++ + 6;
+			else p += 4 * (x++ - y--) + 10;
+		}
+	};
+
 	void DrawSprite(int x, int y, olcSprite *sprite)
 	{
 		if (sprite == nullptr)
@@ -607,10 +631,6 @@ public:
 		thread t = thread(&olcConsoleGameEngine::GameThread, this);
 
 		// Wait for thread to be exited
-		unique_lock<mutex> ul(m_muxGame);
-		m_cvGameFinished.wait(ul);
-
-		// Tidy up
 		t.join();
 	}
 
@@ -634,119 +654,140 @@ private:
 		auto tp1 = chrono::system_clock::now();
 		auto tp2 = chrono::system_clock::now();
 
-		// Run as fast as possible
 		while (m_bAtomActive)
-		{				
-			// Handle Timing
-			tp2 = chrono::system_clock::now();
-			chrono::duration<float> elapsedTime = tp2 - tp1;
-			tp1 = tp2;
-			float fElapsedTime = elapsedTime.count();
-
-			// Handle Keyboard Input
-			for (int i = 0; i < 256; i++)
+		{
+			// Run as fast as possible
+			while (m_bAtomActive)
 			{
-				m_keyNewState[i] = GetAsyncKeyState(i);
-				
-				m_keys[i].bPressed = false;
-				m_keys[i].bReleased = false;
+				// Handle Timing
+				tp2 = chrono::system_clock::now();
+				chrono::duration<float> elapsedTime = tp2 - tp1;
+				tp1 = tp2;
+				float fElapsedTime = elapsedTime.count();
 
-				if (m_keyNewState[i] != m_keyOldState[i])
+				// Handle Keyboard Input
+				for (int i = 0; i < 256; i++)
 				{
-					if (m_keyNewState[i] & 0x8000)
+					m_keyNewState[i] = GetAsyncKeyState(i);
+
+					m_keys[i].bPressed = false;
+					m_keys[i].bReleased = false;
+
+					if (m_keyNewState[i] != m_keyOldState[i])
 					{
-						m_keys[i].bPressed = !m_keys[i].bHeld;
-						m_keys[i].bHeld = true;
+						if (m_keyNewState[i] & 0x8000)
+						{
+							m_keys[i].bPressed = !m_keys[i].bHeld;
+							m_keys[i].bHeld = true;
+						}
+						else
+						{
+							m_keys[i].bReleased = true;
+							m_keys[i].bHeld = false;
+						}
 					}
-					else
-					{
-						m_keys[i].bReleased = true;
-						m_keys[i].bHeld = false;
-					}
+
+					m_keyOldState[i] = m_keyNewState[i];
 				}
 
-				m_keyOldState[i] = m_keyNewState[i];
-			}
+				// Handle Mouse Input - Check for window events
+				INPUT_RECORD inBuf[32];
+				DWORD events = 0;
+				GetNumberOfConsoleInputEvents(m_hConsoleIn, &events);
+				if (events > 0)
+					ReadConsoleInput(m_hConsoleIn, inBuf, events, &events);
 
-			// Handle Mouse Input - Check for window events
-			INPUT_RECORD inBuf[32];
-			DWORD events = 0;
-			GetNumberOfConsoleInputEvents(m_hConsoleIn, &events);
-			if(events > 0)
-				ReadConsoleInput(m_hConsoleIn, inBuf, events, &events);
-
-			// Handle events - we only care about mouse clicks and movement
-			// for now
-			for (DWORD i = 0; i < events; i++)
-			{
-				switch (inBuf[i].EventType)
+				// Handle events - we only care about mouse clicks and movement
+				// for now
+				for (DWORD i = 0; i < events; i++)
 				{
+					switch (inBuf[i].EventType)
+					{
+					case FOCUS_EVENT:
+					{
+						m_bConsoleInFocus = inBuf[i].Event.FocusEvent.bSetFocus;
+					}
+					break;
+
 					case MOUSE_EVENT:
 					{
 						switch (inBuf[i].Event.MouseEvent.dwEventFlags)
 						{
-							case MOUSE_MOVED:
-							{
-								m_mousePosX = inBuf[i].Event.MouseEvent.dwMousePosition.X;
-								m_mousePosY = inBuf[i].Event.MouseEvent.dwMousePosition.Y;
-							}
-							break;
+						case MOUSE_MOVED:
+						{
+							m_mousePosX = inBuf[i].Event.MouseEvent.dwMousePosition.X;
+							m_mousePosY = inBuf[i].Event.MouseEvent.dwMousePosition.Y;
+						}
+						break;
 
-							case 0:
-							{
-								for (int m = 0; m < 5; m++)
-									m_mouseNewState[m] = (inBuf[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
-			
-							}
-							break;
+						case 0:
+						{
+							for (int m = 0; m < 5; m++)
+								m_mouseNewState[m] = (inBuf[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
 
-							default:
-								break;
-						}																	
+						}
+						break;
+
+						default:
+							break;
+						}
 					}
 					break;
 
 					default:
 						break;
 						// We don't care just at the moment
+					}
 				}
-			}
 
-			for (int m = 0; m < 5; m++)
-			{
-				m_mouse[m].bPressed = false;
-				m_mouse[m].bReleased = false;
-
-				if (m_mouseNewState[m] != m_mouseOldState[m])
+				for (int m = 0; m < 5; m++)
 				{
-					if (m_mouseNewState[m])
+					m_mouse[m].bPressed = false;
+					m_mouse[m].bReleased = false;
+
+					if (m_mouseNewState[m] != m_mouseOldState[m])
 					{
-						m_mouse[m].bPressed = true;
-						m_mouse[m].bHeld = true;
+						if (m_mouseNewState[m])
+						{
+							m_mouse[m].bPressed = true;
+							m_mouse[m].bHeld = true;
+						}
+						else
+						{
+							m_mouse[m].bReleased = true;
+							m_mouse[m].bHeld = false;
+						}
 					}
-					else
-					{
-						m_mouse[m].bReleased = true;
-						m_mouse[m].bHeld = false;
-					}
+
+					m_mouseOldState[m] = m_mouseNewState[m];
 				}
 
-				m_mouseOldState[m] = m_mouseNewState[m];
+
+				// Handle Frame Update
+				if (!OnUserUpdate(fElapsedTime))
+					m_bAtomActive = false;
+
+				// Update Title & Present Screen Buffer
+				wchar_t s[256];
+				swprintf_s(s, 256, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f - %d ", m_sAppName.c_str(), 1.0f / fElapsedTime, events);
+				SetConsoleTitle(s);
+				WriteConsoleOutput(m_hConsole, m_bufScreen, { (short)m_nScreenWidth, (short)m_nScreenHeight }, { 0,0 }, &m_rectWindow);
 			}
 
+			if (OnUserDestroy())
+			{
+				// User has permitted destroy, so exit and clean up
 
-			// Handle Frame Update
-			if (!OnUserUpdate(fElapsedTime))
-				m_bAtomActive = false;
-
-			// Update Title & Present Screen Buffer
-			wchar_t s[256];
-			swprintf_s(s, 256, L"OneLoneCoder.com - Console Game Engine - %s - FPS: %3.2f - %d ", m_sAppName.c_str(), 1.0f / fElapsedTime, events);
-			SetConsoleTitle(s);
-			WriteConsoleOutput(m_hConsole, m_bufScreen, { (short)m_nScreenWidth, (short)m_nScreenHeight }, { 0,0 }, &m_rectWindow);
+				delete[] m_bufScreen;
+				SetConsoleActiveScreenBuffer(m_hOriginalConsole);
+				m_cvGameFinished.notify_one();
+			}
+			else
+			{
+				// User denied destroy for some reason, so continue running
+				m_bAtomActive = true;
+			}
 		}
-
-		m_cvGameFinished.notify_one();
 	}
 
 public:
@@ -754,15 +795,15 @@ public:
 	virtual bool OnUserCreate() = 0;
 	virtual bool OnUserUpdate(float fElapsedTime) = 0;	
 
+	// Optional for clean up 
+	virtual bool OnUserDestroy()
+	{
+		return true;
+	}
+
 
 protected:
-	int m_nScreenWidth;
-	int m_nScreenHeight;
-	CHAR_INFO *m_bufScreen;
-	atomic<bool> m_bAtomActive;
-	condition_variable m_cvGameFinished;
-	mutex m_muxGame;
-	wstring m_sAppName;
+	
 
 	struct sKeyState
 	{
@@ -775,11 +816,11 @@ protected:
 	int m_mousePosY;
 
 public:
-	sKeyState GetKey(int nKeyID)
-	{
-		return m_keys[nKeyID];
-	}
-
+	sKeyState GetKey(int nKeyID){ return m_keys[nKeyID]; }
+	int GetMouseX() { return m_mousePosX; }
+	int GetMouseY() { return m_mousePosY; }
+	sKeyState GetMouse(int nMouseButtonID) { return m_mouse[nMouseButtonID]; }
+	bool IsFocused() { return m_bConsoleInFocus; }
 
 
 protected:
@@ -789,17 +830,45 @@ protected:
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
 		SetConsoleActiveScreenBuffer(m_hOriginalConsole);
 		wprintf(L"ERROR: %s\n\t%s\n", msg, buf);
-		return -1;
+		return 0;
 	}
 
-private:
+	static BOOL CloseHandler(DWORD evt)
+	{
+		// Note this gets called in a seperate OS thread, so it must
+		// only exit when the game has finished cleaning up, or else
+		// the process will be killed before OnUserDestroy() has finished
+		if (evt == CTRL_CLOSE_EVENT)
+		{
+			m_bAtomActive = false;
+
+			// Wait for thread to be exited
+			unique_lock<mutex> ul(m_muxGame);
+			m_cvGameFinished.wait(ul);
+		}
+		return true;
+	}
+
+protected:
+	int m_nScreenWidth;
+	int m_nScreenHeight;
+	CHAR_INFO *m_bufScreen;
+	wstring m_sAppName;
 	HANDLE m_hOriginalConsole;
 	CONSOLE_SCREEN_BUFFER_INFO m_OriginalConsoleInfo;
 	HANDLE m_hConsole;
 	HANDLE m_hConsoleIn;
 	SMALL_RECT m_rectWindow;
-	short *m_keyOldState;
-	short *m_keyNewState;
-	bool m_mouseOldState[5];
-	bool m_mouseNewState[5];
+	short m_keyOldState[256] = { 0 };
+	short m_keyNewState[256] = { 0 };
+	bool m_mouseOldState[5] = { 0 };
+	bool m_mouseNewState[5] = { 0 };
+	bool m_bConsoleInFocus = true;
+	static atomic<bool> m_bAtomActive;
+	static condition_variable m_cvGameFinished;
+	static mutex m_muxGame;
 };
+
+atomic<bool> olcConsoleGameEngine::m_bAtomActive = false;
+condition_variable olcConsoleGameEngine::m_cvGameFinished;
+mutex olcConsoleGameEngine::m_muxGame;
