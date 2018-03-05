@@ -2,13 +2,30 @@
 OneLoneCoder.com - Command Line Game Engine
 "Who needs a frame buffer?" - @Javidx9
 
-Disclaimer
-~~~~~~~~~~
-I don't care what you use this for. It's intended to be educational, and perhaps
-to the oddly minded - a little bit of fun. Please hack this, change it and use it
-in any way you see fit. BUT, you acknowledge that I am not responsible for anything
-bad that happens as a result of your actions. However, if good stuff happens, I
-would appreciate a shout out, or at least give the blog some publicity for me.
+License
+~~~~~~~
+One Lone Coder Console Game Engine  Copyright (C) 2018  Javidx9
+
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; See license for details. 
+Original works located at:
+https://www.github.com/onelonecoder
+https://www.onelonecoder.com
+https://www.youtube.com/javidx9
+
+GNU GPLv3
+https://github.com/OneLoneCoder/videos/blob/master/LICENSE
+
+From Javidx9 :)
+~~~~~~~~~~~~~~~
+Hello! Ultimately I don't care what you use this for. It's intended to be 
+educational, and perhaps to the oddly minded - a little bit of fun. 
+Please hack this, change it and use it in any way you see fit. You acknowledge 
+that I am not responsible for anything bad that happens as a result of 
+your actions. However this code is protected by GNU GPLv3, see the license in the
+github repo. This means you must attribute me if you use it. You can view this
+license here: https://github.com/OneLoneCoder/videos/blob/master/LICENSE
 Cheers!
 
 Background
@@ -26,16 +43,16 @@ YouTube: http://www.youtube.com/javidx9
 
 Videos:
 ~~~~~~
-Original:				https://youtu.be/cWc0hgYwZyc
+Original:		https://youtu.be/cWc0hgYwZyc
 Added mouse support:	https://youtu.be/tdqc9hZhHxM
-Beginners Guide:		https://youtu.be/u5BhrA8ED0o
+Beginners Guide:	https://youtu.be/u5BhrA8ED0o
 
 Shout Outs!
 ~~~~~~~~~~~
 Thanks to cool people who helped with testing, bug-finding and fixing!
-	YouTube: 	wowLinh, JavaJack59, idkwid, kingtatgi
+	YouTube: 	wowLinh, JavaJack59, idkwid, kingtatgi, huhlig
 
-Last Updated: 04/02/2018
+Last Updated: 05/03/2018
 
 Usage:
 ~~~~~~
