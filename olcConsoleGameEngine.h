@@ -5,27 +5,28 @@ OneLoneCoder.com - Command Line Game Engine
 License
 ~~~~~~~
 One Lone Coder Console Game Engine  Copyright (C) 2018  Javidx9
-
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
-under certain conditions; See license for details. 
+under certain conditions; See license for details.
+
 Original works located at:
-https://www.github.com/onelonecoder
-https://www.onelonecoder.com
-https://www.youtube.com/javidx9
+	https://www.github.com/onelonecoder
+	https://www.onelonecoder.com
+	https://www.youtube.com/javidx9
 
 GNU GPLv3
-https://github.com/OneLoneCoder/videos/blob/master/LICENSE
+	https://github.com/OneLoneCoder/videos/blob/master/LICENSE
 
 From Javidx9 :)
 ~~~~~~~~~~~~~~~
-Hello! Ultimately I don't care what you use this for. It's intended to be 
-educational, and perhaps to the oddly minded - a little bit of fun. 
-Please hack this, change it and use it in any way you see fit. You acknowledge 
-that I am not responsible for anything bad that happens as a result of 
+Hello! Ultimately I don't care what you use this for. It's intended to be
+educational, and perhaps to the oddly minded - a little bit of fun.
+Please hack this, change it and use it in any way you see fit. You acknowledge
+that I am not responsible for anything bad that happens as a result of
 your actions. However this code is protected by GNU GPLv3, see the license in the
 github repo. This means you must attribute me if you use it. You can view this
 license here: https://github.com/OneLoneCoder/videos/blob/master/LICENSE
+
 Cheers!
 
 Background
@@ -37,22 +38,22 @@ each time, so this class wraps that up.
 
 Author
 ~~~~~~
-Twitter: @javidx9 http://twitter.com/javidx9
-Blog: http://www.onelonecoder.com
-YouTube: http://www.youtube.com/javidx9
+Twitter: @javidx9	http://twitter.com/javidx9
+Blog:				http://www.onelonecoder.com
+YouTube:			http://www.youtube.com/javidx9
 
 Videos:
 ~~~~~~
-Original:		https://youtu.be/cWc0hgYwZyc
+Original:				https://youtu.be/cWc0hgYwZyc
 Added mouse support:	https://youtu.be/tdqc9hZhHxM
-Beginners Guide:	https://youtu.be/u5BhrA8ED0o
+Beginners Guide:		https://youtu.be/u5BhrA8ED0o
 
 Shout Outs!
 ~~~~~~~~~~~
 Thanks to cool people who helped with testing, bug-finding and fixing!
-	YouTube: 	wowLinh, JavaJack59, idkwid, kingtatgi, huhlig
+wowLinh, JavaJack59, idkwid, kingtatgi, Return Null, CPP Guy
 
-Last Updated: 05/03/2018
+Last Updated: 18/03/2018
 
 Usage:
 ~~~~~~
@@ -107,8 +108,12 @@ http://www.twitch.tv/javidx9
 
 #ifndef UNICODE
 #error Please enable UNICODE for your compiler! VS: Project Properties -> General -> \
-Character Set -> Use Unicode. Thanks! - Javidx9
+Character Set -> Use Unicode. Thanks! For now, I'll try enabling it for you - Javidx9
+#define UNICODE
+#define _UNICODE
 #endif
+
+#include <windows.h>
 
 #include <iostream>
 #include <chrono>
@@ -119,7 +124,7 @@ Character Set -> Use Unicode. Thanks! - Javidx9
 #include <condition_variable>
 using namespace std;
 
-#include <windows.h>
+
 
 
 enum COLOUR
@@ -364,8 +369,18 @@ public:
 		cfi.dwFontSize.Y = fonth;
 		cfi.FontFamily = FF_DONTCARE;
 		cfi.FontWeight = FW_NORMAL;
+
+		DWORD version = GetVersion();
+		DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
+		DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));
+
+		if ((major > 6) || ((major == 6) && (minor >= 2) && (minor < 4)))		
+			wcscpy_s(cfi.FaceName, L"Raster"); // Windows 8 :(
+		else
+			wcscpy_s(cfi.FaceName, L"Lucida Console"); // Everything else :P
+
 		//wcscpy_s(cfi.FaceName, L"Liberation Mono");
-		wcscpy_s(cfi.FaceName, L"Consolas");
+		//wcscpy_s(cfi.FaceName, L"Consolas");
 		if (!SetCurrentConsoleFontEx(m_hConsole, false, &cfi))
 			return Error(L"SetCurrentConsoleFontEx");
 
@@ -392,6 +407,7 @@ public:
 		m_bufScreen = new CHAR_INFO[m_nScreenWidth*m_nScreenHeight];
 		memset(m_bufScreen, 0, sizeof(CHAR_INFO) * m_nScreenWidth * m_nScreenHeight);
 
+		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CloseHandler, TRUE);
 		return 1;
 	}
 
@@ -547,7 +563,7 @@ public:
 
 		auto drawline = [&](int sx, int ex, int ny)
 		{
-			for (int i = sx; i < ex; i++)
+			for (int i = sx; i <= ex; i++)
 				Draw(i, ny, c, col);
 		};
 
@@ -886,6 +902,6 @@ protected:
 	static mutex m_muxGame;
 };
 
-atomic<bool> olcConsoleGameEngine::m_bAtomActive = false;
+atomic<bool> olcConsoleGameEngine::m_bAtomActive(false);
 condition_variable olcConsoleGameEngine::m_cvGameFinished;
 mutex olcConsoleGameEngine::m_muxGame;
