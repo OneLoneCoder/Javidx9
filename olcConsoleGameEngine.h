@@ -370,13 +370,13 @@ public:
 		cfi.FontFamily = FF_DONTCARE;
 		cfi.FontWeight = FW_NORMAL;
 
-		DWORD version = GetVersion();
+		/*DWORD version = GetVersion();
 		DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
 		DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));
 
 		if ((major > 6) || ((major == 6) && (minor >= 2) && (minor < 4)))		
 			wcscpy_s(cfi.FaceName, L"Raster"); // Windows 8 :(
-		else
+		else*/
 			wcscpy_s(cfi.FaceName, L"Lucida Console"); // Everything else :P
 
 		//wcscpy_s(cfi.FaceName, L"Liberation Mono");
