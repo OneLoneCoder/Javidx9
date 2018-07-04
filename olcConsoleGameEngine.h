@@ -4,6 +4,20 @@ OneLoneCoder.com - Command Line Game Engine
 
 The Original & Best :P
 
+One Lone Coder License
+~~~~~~~~~~~~~~~~~~~~~~
+- This software is Copyright (C) 2018 Javidx9
+- This is free software
+- This software comes with absolutely no warranty
+- The copyright holder is not liable or responsible for anything
+  this software does or does not
+- You use this software at your own risk
+- You can distribute this software
+- You can modify this software
+- Redistribution of this software or a derivative of this software
+  must attribute the Copyright holder named above, in a manner
+  visible to the end user
+
 License
 ~~~~~~~
 One Lone Coder Console Game Engine  Copyright (C) 2018  Javidx9
@@ -1091,7 +1105,12 @@ protected: // Audio Engine =====================================================
 	// Add sample 'id' to the mixers sounds to play list
 	void PlaySample(int id, bool bLoop = false)
 	{
-		listActiveSamples.push_back({ id, 0, false, bLoop });
+		sCurrentlyPlayingSample a;
+		a.nAudioSampleID = id;
+		a.nSamplePosition = 0;
+		a.bFinished = false;
+		a.bLoop = bLoop;
+		listActiveSamples.push_back(a);
 	}
 
 	void StopSample(int id)

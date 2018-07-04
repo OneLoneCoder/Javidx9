@@ -1802,7 +1802,12 @@ protected:
 		// Add sample 'id' to the mixers sounds to play list
 		void PlaySample(int id, bool bLoop = false)
 		{
-			listActiveSamples.push_back({ id, 0, false, bLoop });
+			sCurrentlyPlayingSample a;
+			a.nAudioSampleID = id;
+			a.nSamplePosition = 0;
+			a.bFinished = false;
+			a.bLoop = bLoop;
+			listActiveSamples.push_back(a);
 		}
 
 		void StopSample(int id)

@@ -1413,9 +1413,14 @@ unsigned int olcConsoleGameEngineGLOOP::LoadAudioSample(std::wstring sWavFile)
 }
 
 // Add sample 'id' to the mixers sounds to play list
-void olcConsoleGameEngineGLOOP::PlaySample(int id, bool bLoop)
+void olcConsoleGameEngineOOP::PlaySample(int id, bool bLoop = false)
 {
-	listActiveSamples.push_back({ id, 0, false, bLoop });
+	sCurrentlyPlayingSample a;
+	a.nAudioSampleID = id;
+	a.nSamplePosition = 0;
+	a.bFinished = false;
+	a.bLoop = bLoop;
+	listActiveSamples.push_back(a);
 }
 
 void olcConsoleGameEngineGLOOP::StopSample(int id)
