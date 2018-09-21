@@ -11,7 +11,7 @@ NOTE: DOES NOT SUUPORT MOUSE INPUT YET
 
 I recommend compiling as follows, of course you need SDL from your vendor
 
- g++ thing.cpp -DUNICODE -I/usr/include/SDL2 -lSDL2 -lpthread -std=C++11
+ g++ thing.cpp -DUNICODE -I/usr/include/SDL2 -lSDL2 -lpthread -std=c++11
 
 I'd like to explain how this version came about, because without the help of
 some awesome individuals, this would not be a thing!
@@ -816,6 +816,24 @@ private:
 						}
 						break;
 
+                        case SDL_MOUSEMOTION:
+						{
+							m_mousePosX = e.motion.x / m_nFontWidth;
+							m_mousePosY = e.motion.y / m_nFontHeight;
+						}
+						break;
+						
+						case SDL_MOUSEBUTTONDOWN:
+						{
+							m_mouseNewState[e.button.button - 1] = true;
+						}
+						break;
+						
+						case SDL_MOUSEBUTTONUP:
+						{
+							m_mouseNewState[e.button.button - 1] = false;
+						}
+						break;
 					}
 				}
 
@@ -843,7 +861,7 @@ private:
 				}
 
 				// Handle Mouse Input - Check for window events
-			/*	INPUT_RECORD inBuf[32];
+				/*INPUT_RECORD inBuf[32];
 				DWORD events = 0;
 				GetNumberOfConsoleInputEvents(m_hConsoleIn, &events);
 				if (events > 0)
@@ -892,7 +910,7 @@ private:
 				//	}
 				//}
 
-				/*for (int m = 0; m < 5; m++)
+				for (int m = 0; m < 5; m++)
 				{
 					m_mouse[m].bPressed = false;
 					m_mouse[m].bReleased = false;
@@ -913,7 +931,6 @@ private:
 
 					m_mouseOldState[m] = m_mouseNewState[m];
 				}
-*/
 
 				// Handle Frame Update
 				if (!OnUserUpdate(fElapsedTime))
@@ -1012,7 +1029,7 @@ protected:
 		bool bPressed;
 		bool bReleased;
 		bool bHeld;
-	};
+	} m_mouse[5];
 
 	struct sKeyStateWrap
 	{
@@ -1099,7 +1116,7 @@ public:
 
 	int GetMouseX() { return m_mousePosX; }
 	int GetMouseY() { return m_mousePosY; }
-	//sKeyState GetMouse(int nMouseButtonID) { return m_mouse[nMouseButtonID]; }
+	sKeyState GetMouse(int nMouseButtonID) { return m_mouse[nMouseButtonID]; }
 	bool IsFocused() { return m_bConsoleInFocus; }
 
 
