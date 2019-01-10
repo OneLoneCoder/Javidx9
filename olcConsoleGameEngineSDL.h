@@ -1498,7 +1498,8 @@ protected: // Audio Engine =====================================================
 	SDL_AudioDeviceID deviceID;
 	SDL_AudioSpec spec, sampleSpec;
 
-	std::atomic<float> m_fGlobalTime = 0.0f;
+	//thx J. Random Programmer
+	std::atomic<float> m_fGlobalTime = {0.0f};
 };
 
 std::atomic<bool> olcConsoleGameEngine::m_bAtomActive(false);
