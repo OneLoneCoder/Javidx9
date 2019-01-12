@@ -18,6 +18,9 @@ some awesome individuals, this would not be a thing!
 Firstly, Thanks to Jack Clarke (JackOJC on Discord and Github). He had the
 idea of porting over the olcConsoleGameEngine to non-windows operating systems.
 
+Also big thanks to Gorbit99 for adding audio facilities and tidying up a lot
+of loose ends for this file.
+
 He developed a prototype which can be found here:
 https://github.com/Jackojc/olcNotSoConsoleGameEngine
 which really proved that it could be possible.
