@@ -5,6 +5,7 @@ OneLoneCoder.com - Command Line Game Engine
 For the *nix and Mac users - like most Linux software, this
 may not be fully compatible or fully featured, and development
 will invariably lag behind the rest - sorry.
+(You thought, Javid, you thought)
 
 I recommend compiling as follows, of course you need SDL from your vendor
 
@@ -19,7 +20,7 @@ Firstly, Thanks to Jack Clarke (JackOJC on Discord and Github). He had the
 idea of porting over the olcConsoleGameEngine to non-windows operating systems.
 
 Also big thanks to Gorbit99 for adding audio facilities and tidying up a lot
-of loose ends for this file.
+of loose ends for this file. (Aww, haven't seen this 'til now)
 
 He developed a prototype which can be found here:
 https://github.com/Jackojc/olcNotSoConsoleGameEngine
@@ -91,7 +92,7 @@ Shout Outs!
 Thanks to cool people who helped with testing, bug-finding and fixing!
 wowLinh, JavaJack59, idkwid, kingtatgi, Return Null, CPP Guy
 
-Last Updated: 01/07/2018
+Last Updated: 15/01/2019
 
 Usage:
 ~~~~~~
@@ -172,37 +173,39 @@ Character Set -> Use Unicode. Thanks! For now, Ill try enabling it for you - Jav
 #include <string>
 
 #define KEY_OFFSET 256
-#define VK_SPACE SDL_SCANCODE_SPACE 		  + KEY_OFFSET
-#define VK_BACK SDL_SCANCODE_BACKSPACE		  + KEY_OFFSET
-#define VK_DELETE SDL_SCANCODE_DELETE		  + KEY_OFFSET
-#define VK_HOME SDL_SCANCODE_HOME			  + KEY_OFFSET
-#define VK_END SDL_SCANCODE_END				  + KEY_OFFSET
-#define VK_RETURN SDL_SCANCODE_RETURN		  + KEY_OFFSET
-#define VK_TAB SDL_SCANCODE_TAB				  + KEY_OFFSET
-#define VK_INSERT SDL_SCANCODE_INSERT		  + KEY_OFFSET
-#define VK_LSHIFT SDL_SCANCODE_LSHIFT		  + KEY_OFFSET
-#define VK_RSHIFT SDL_SCANCODE_RSHIFT		  + KEY_OFFSET
-#define VK_LCONTROL SDL_SCANCODE_LCTRL		  + KEY_OFFSET
-#define VK_RCONTROL SDL_SCANCODE_RCTRL		  + KEY_OFFSET
-#define VK_PRIOR SDL_SCANCODE_PAGEUP		  + KEY_OFFSET
-#define VK_NEXT SDL_SCANCODE_PAGEDOWN		  + KEY_OFFSET
-#define VK_ESCAPE SDL_SCANCODE_ESCAPE		  + KEY_OFFSET
-#define VK_UP SDL_SCANCODE_UP				  + KEY_OFFSET
-#define VK_DOWN	SDL_SCANCODE_DOWN			  + KEY_OFFSET
-#define VK_LEFT SDL_SCANCODE_LEFT			  + KEY_OFFSET
-#define VK_RIGHT SDL_SCANCODE_RIGHT			  + KEY_OFFSET
-#define VK_F1 SDL_SCANCODE_F1				  + KEY_OFFSET
-#define VK_F2 SDL_SCANCODE_F2				  + KEY_OFFSET
-#define VK_F3 SDL_SCANCODE_F3				  + KEY_OFFSET
-#define VK_F4 SDL_SCANCODE_F4				  + KEY_OFFSET
-#define VK_F5 SDL_SCANCODE_F5				  + KEY_OFFSET
-#define VK_F6 SDL_SCANCODE_F6				  + KEY_OFFSET
-#define VK_F7 SDL_SCANCODE_F7				  + KEY_OFFSET
-#define VK_F8 SDL_SCANCODE_F8				  + KEY_OFFSET
-#define VK_F9 SDL_SCANCODE_F9				  + KEY_OFFSET
-#define VK_F10 SDL_SCANCODE_F10				  + KEY_OFFSET
-#define VK_F11 SDL_SCANCODE_F11				  + KEY_OFFSET
-#define VK_F12 SDL_SCANCODE_F12				  + KEY_OFFSET
+#define VK_SPACE (SDLK_SPACE & 0xffff) 		  + KEY_OFFSET
+#define VK_BACK (SDLK_BACKSPACE & 0xffff)		  + KEY_OFFSET
+#define VK_DELETE (SDLK_DELETE & 0xffff)		  + KEY_OFFSET
+#define VK_HOME (SDLK_HOME & 0xffff)			  + KEY_OFFSET
+#define VK_END (SDLK_END & 0xffff)				  + KEY_OFFSET
+#define VK_RETURN (SDLK_RETURN & 0xffff)		  + KEY_OFFSET
+#define VK_TAB (SDLK_TAB & 0xffff)				  + KEY_OFFSET
+#define VK_INSERT (SDLK_INSERT & 0xffff)		  + KEY_OFFSET
+#define VK_LSHIFT (SDLK_LSHIFT & 0xffff)		  + KEY_OFFSET
+#define VK_RSHIFT (SDLK_RSHIFT & 0xffff)		  + KEY_OFFSET
+#define VK_LCONTROL (SDLK_LCTRL & 0xffff)		  + KEY_OFFSET
+#define VK_RCONTROL (SDLK_RCTRL & 0xffff)		  + KEY_OFFSET
+#define VK_PRIOR (SDLK_PAGEUP & 0xffff)		  + KEY_OFFSET
+#define VK_NEXT (SDLK_PAGEDOWN & 0xffff)		  + KEY_OFFSET
+#define VK_ESCAPE (SDLK_ESCAPE & 0xffff)		  + KEY_OFFSET
+#define VK_UP (SDLK_UP & 0xffff)				  + KEY_OFFSET
+#define VK_DOWN	(SDLK_DOWN & 0xffff)			  + KEY_OFFSET
+#define VK_LEFT (SDLK_LEFT & 0xffff)			  + KEY_OFFSET
+#define VK_RIGHT (SDLK_RIGHT & 0xffff)			  + KEY_OFFSET
+#define VK_F1 (SDLK_F1 & 0xffff)				  + KEY_OFFSET
+#define VK_F2 (SDLK_F2 & 0xffff)				  + KEY_OFFSET
+#define VK_F3 (SDLK_F3 & 0xffff)				  + KEY_OFFSET
+#define VK_F4 (SDLK_F4 & 0xffff)				  + KEY_OFFSET
+#define VK_F5 (SDLK_F5 & 0xffff)				  + KEY_OFFSET
+#define VK_F6 (SDLK_F6 & 0xffff)				  + KEY_OFFSET
+#define VK_F7 (SDLK_F7 & 0xffff)				  + KEY_OFFSET
+#define VK_F8 (SDLK_F8 & 0xffff)				  + KEY_OFFSET
+#define VK_F9 (SDLK_F9 & 0xffff)				  + KEY_OFFSET
+#define VK_F10 (SDLK_F10 & 0xffff)				  + KEY_OFFSET
+#define VK_F11 (SDLK_F11 & 0xffff)				  + KEY_OFFSET
+#define VK_F12 (SDLK_F12 & 0xffff)				  + KEY_OFFSET
+#define VK_MENU (SDLK_MENU & 0xffff)			  + KEY_OFFSET
+#define VK_OEM_3 (SDLK_GRAVE & 0xffff)			  + KEY_OFFSET
 
 struct CHAR_INFO
 {
@@ -724,10 +727,11 @@ public:
 		m_bAtomActive = true;
 
 		// Start the thread
-		std::thread t = std::thread(&olcConsoleGameEngine::GameThread, this);
+		//std::thread t = std::thread(&olcConsoleGameEngine::GameThread, this);
+		GameThread();
 
 		// Wait for thread to be exited
-		t.join();
+		//t.join();
 	}
 
 	int ScreenWidth()
@@ -813,14 +817,14 @@ private:
 
 					case SDL_KEYDOWN:
 					{
-						int k = e.key.keysym.scancode; // SDL Scancode
+						int k = e.key.keysym.sym & 0xfff; // SDL keycode
 						m_keyNewState[k] = true;
 					}
 					break;
 
 					case SDL_KEYUP:
 					{
-						int k = e.key.keysym.scancode; // SDL Scancode
+						int k = e.key.keysym.sym & 0xfff; // SDL keycode
 						m_keyNewState[k] = false;
 					}
 					break;
@@ -1105,65 +1109,65 @@ protected:
 	public:
 		sKeyState & operator[] (int nKeyID)
 		{
-			SDL_Scancode scode = SDL_SCANCODE_UNKNOWN;
+			SDL_Keycode scode = (SDLK_UNKNOWN & 0xffff);
 
 			if (nKeyID > KEY_OFFSET)
 			{
-				int scode = (SDL_Scancode)nKeyID - KEY_OFFSET;
+				int scode = (SDL_Keycode)nKeyID - KEY_OFFSET;
 				return _state[scode];
 			}
 
 			switch (nKeyID)
 			{
-			case L'A': scode = SDL_SCANCODE_A; break;
-			case L'B': scode = SDL_SCANCODE_B; break;
-			case L'C': scode = SDL_SCANCODE_C; break;
-			case L'D': scode = SDL_SCANCODE_D; break;
-			case L'E': scode = SDL_SCANCODE_E; break;
-			case L'F': scode = SDL_SCANCODE_F; break;
-			case L'G': scode = SDL_SCANCODE_G; break;
-			case L'H': scode = SDL_SCANCODE_H; break;
-			case L'I': scode = SDL_SCANCODE_I; break;
-			case L'J': scode = SDL_SCANCODE_J; break;
-			case L'K': scode = SDL_SCANCODE_K; break;
-			case L'L': scode = SDL_SCANCODE_L; break;
-			case L'M': scode = SDL_SCANCODE_M; break;
-			case L'N': scode = SDL_SCANCODE_N; break;
-			case L'O': scode = SDL_SCANCODE_O; break;
-			case L'P': scode = SDL_SCANCODE_P; break;
-			case L'Q': scode = SDL_SCANCODE_Q; break;
-			case L'R': scode = SDL_SCANCODE_R; break;
-			case L'S': scode = SDL_SCANCODE_S; break;
-			case L'T': scode = SDL_SCANCODE_T; break;
-			case L'U': scode = SDL_SCANCODE_U; break;
-			case L'V': scode = SDL_SCANCODE_V; break;
-			case L'W': scode = SDL_SCANCODE_W; break;
-			case L'X': scode = SDL_SCANCODE_X; break;
-			case L'Y': scode = SDL_SCANCODE_Y; break;
-			case L'Z': scode = SDL_SCANCODE_Z; break;
-			case L'0': scode = SDL_SCANCODE_0; break;
-			case L'1': scode = SDL_SCANCODE_1; break;
-			case L'2': scode = SDL_SCANCODE_2; break;
-			case L'3': scode = SDL_SCANCODE_3; break;
-			case L'4': scode = SDL_SCANCODE_4; break;
-			case L'5': scode = SDL_SCANCODE_5; break;
-			case L'6': scode = SDL_SCANCODE_6; break;
-			case L'7': scode = SDL_SCANCODE_7; break;
-			case L'8': scode = SDL_SCANCODE_8; break;
-			case L'9': scode = SDL_SCANCODE_9; break;
+			case L'A': scode = (SDLK_a & 0xffff); break;
+			case L'B': scode = (SDLK_b & 0xffff); break;
+			case L'C': scode = (SDLK_c & 0xffff); break;
+			case L'D': scode = (SDLK_d & 0xffff); break;
+			case L'E': scode = (SDLK_e & 0xffff); break;
+			case L'F': scode = (SDLK_f & 0xffff); break;
+			case L'G': scode = (SDLK_g & 0xffff); break;
+			case L'H': scode = (SDLK_h & 0xffff); break;
+			case L'I': scode = (SDLK_i & 0xffff); break;
+			case L'J': scode = (SDLK_j & 0xffff); break;
+			case L'K': scode = (SDLK_k & 0xffff); break;
+			case L'L': scode = (SDLK_l & 0xffff); break;
+			case L'M': scode = (SDLK_m & 0xffff); break;
+			case L'N': scode = (SDLK_n & 0xffff); break;
+			case L'O': scode = (SDLK_o & 0xffff); break;
+			case L'P': scode = (SDLK_p & 0xffff); break;
+			case L'Q': scode = (SDLK_q & 0xffff); break;
+			case L'R': scode = (SDLK_r & 0xffff); break;
+			case L'S': scode = (SDLK_s & 0xffff); break;
+			case L'T': scode = (SDLK_t & 0xffff); break;
+			case L'U': scode = (SDLK_u & 0xffff); break;
+			case L'V': scode = (SDLK_v & 0xffff); break;
+			case L'W': scode = (SDLK_w & 0xffff); break;
+			case L'X': scode = (SDLK_x & 0xffff); break;
+			case L'Y': scode = (SDLK_y & 0xffff); break;
+			case L'Z': scode = (SDLK_z & 0xffff); break;
+			case L'0': scode = (SDLK_0 & 0xffff); break;
+			case L'1': scode = (SDLK_1 & 0xffff); break;
+			case L'2': scode = (SDLK_2 & 0xffff); break;
+			case L'3': scode = (SDLK_3 & 0xffff); break;
+			case L'4': scode = (SDLK_4 & 0xffff); break;
+			case L'5': scode = (SDLK_5 & 0xffff); break;
+			case L'6': scode = (SDLK_6 & 0xffff); break;
+			case L'7': scode = (SDLK_7 & 0xffff); break;
+			case L'8': scode = (SDLK_8 & 0xffff); break;
+			case L'9': scode = (SDLK_9 & 0xffff); break;
 
-				/*case L'\'': scode = SDL_SCANCODE_APOSTROPHE; break;
-				case L'\\': scode = SDL_SCANCODE_BACKSLASH; break;
-				case L',': scode = SDL_SCANCODE_COMMA; break;
-				case L'=': scode = SDL_SCANCODE_EQUALS; break;
-				case L'[': scode = SDL_SCANCODE_LEFTBRACKET; break;
-				case L']': scode = SDL_SCANCODE_RIGHTBRACKET; break;
-				case L'-': scode = SDL_SCANCODE_MINUS; break;
-				case L'.': scode = SDL_SCANCODE_PERIOD; break;
-				case L';': scode = SDL_SCANCODE_SEMICOLON; break;
-				case L'/': scode = SDL_SCANCODE_SLASH; break;*/
+				/*case L'\'': scode = (SDLK_APOSTROPHE & 0xffff); break;
+				case L'\\': scode = (SDLK_BACKSLASH & 0xffff); break;
+				case L',': scode = (SDLK_COMMA & 0xffff); break;
+				case L'=': scode = (SDLK_EQUALS & 0xffff); break;
+				case L'[': scode = (SDLK_LEFTBRACKET & 0xffff); break;
+				case L']': scode = (SDLK_RIGHTBRACKET & 0xffff); break;
+				case L'-': scode = (SDLK_MINUS & 0xffff); break;
+				case L'.': scode = (SDLK_PERIOD & 0xffff); break;
+				case L';': scode = (SDLK_SEMICOLON & 0xffff); break;
+				case L'/': scode = (SDLK_SLASH & 0xffff); break;*/
 
-			default: scode = (SDL_Scancode)nKeyID;
+			default: scode = (SDL_Keycode)nKeyID;
 			}
 
 			return _state[scode];
@@ -1233,6 +1237,174 @@ protected:
 	//	}
 	//	return true;
 	//}
+
+
+	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, short c = 0x2588, short col = 0x000F)
+	{
+		DrawLine(x1, y1, x2, y2, c, col);
+		DrawLine(x2, y2, x3, y3, c, col);
+		DrawLine(x3, y3, x1, y1, c, col);
+	}
+
+	// https://www.avrfreaks.net/sites/default/files/triangles.c
+	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, short c = 0x2588, short col = 0x000F)
+	{
+		auto SWAP = [](int &x, int &y) { int t = x; x = y; y = t; };
+		auto drawline = [&](int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) Draw(i, ny, c, col); };
+
+		int t1x, t2x, y, minx, maxx, t1xp, t2xp;
+		bool changed1 = false;
+		bool changed2 = false;
+		int signx1, signx2, dx1, dy1, dx2, dy2;
+		int e1, e2;
+		// Sort vertices
+		if (y1 > y2) { SWAP(y1, y2); SWAP(x1, x2); }
+		if (y1 > y3) { SWAP(y1, y3); SWAP(x1, x3); }
+		if (y2 > y3) { SWAP(y2, y3); SWAP(x2, x3); }
+
+		t1x = t2x = x1; y = y1;   // Starting points
+		dx1 = (int)(x2 - x1); if (dx1 < 0) { dx1 = -dx1; signx1 = -1; }
+		else signx1 = 1;
+		dy1 = (int)(y2 - y1);
+
+		dx2 = (int)(x3 - x1); if (dx2 < 0) { dx2 = -dx2; signx2 = -1; }
+		else signx2 = 1;
+		dy2 = (int)(y3 - y1);
+
+		if (dy1 > dx1) {   // swap values
+			SWAP(dx1, dy1);
+			changed1 = true;
+		}
+		if (dy2 > dx2) {   // swap values
+			SWAP(dy2, dx2);
+			changed2 = true;
+		}
+
+		e2 = (int)(dx2 >> 1);
+		// Flat top, just process the second half
+		if (y1 == y2) goto next;
+		e1 = (int)(dx1 >> 1);
+
+		for (int i = 0; i < dx1;) {
+			t1xp = 0; t2xp = 0;
+			if (t1x < t2x) { minx = t1x; maxx = t2x; }
+			else { minx = t2x; maxx = t1x; }
+			// process first line until y value is about to change
+			while (i < dx1) {
+				i++;
+				e1 += dy1;
+				while (e1 >= dx1) {
+					e1 -= dx1;
+					if (changed1) t1xp = signx1;//t1x += signx1;
+					else          goto next1;
+				}
+				if (changed1) break;
+				else t1x += signx1;
+			}
+			// Move line
+		next1:
+			// process second line until y value is about to change
+			while (1) {
+				e2 += dy2;
+				while (e2 >= dx2) {
+					e2 -= dx2;
+					if (changed2) t2xp = signx2;//t2x += signx2;
+					else          goto next2;
+				}
+				if (changed2)     break;
+				else              t2x += signx2;
+			}
+		next2:
+			if (minx > t1x) minx = t1x; if (minx > t2x) minx = t2x;
+			if (maxx < t1x) maxx = t1x; if (maxx < t2x) maxx = t2x;
+			drawline(minx, maxx, y);    // Draw line from min to max points found on the y
+										 // Now increase y
+			if (!changed1) t1x += signx1;
+			t1x += t1xp;
+			if (!changed2) t2x += signx2;
+			t2x += t2xp;
+			y += 1;
+			if (y == y2) break;
+
+		}
+	next:
+		// Second half
+		dx1 = (int)(x3 - x2); if (dx1 < 0) { dx1 = -dx1; signx1 = -1; }
+		else signx1 = 1;
+		dy1 = (int)(y3 - y2);
+		t1x = x2;
+
+		if (dy1 > dx1) {   // swap values
+			SWAP(dy1, dx1);
+			changed1 = true;
+		}
+		else changed1 = false;
+
+		e1 = (int)(dx1 >> 1);
+
+		for (int i = 0; i <= dx1; i++) {
+			t1xp = 0; t2xp = 0;
+			if (t1x < t2x) { minx = t1x; maxx = t2x; }
+			else { minx = t2x; maxx = t1x; }
+			// process first line until y value is about to change
+			while (i < dx1) {
+				e1 += dy1;
+				while (e1 >= dx1) {
+					e1 -= dx1;
+					if (changed1) { t1xp = signx1; break; }//t1x += signx1;
+					else          goto next3;
+				}
+				if (changed1) break;
+				else   	   	  t1x += signx1;
+				if (i < dx1) i++;
+			}
+		next3:
+			// process second line until y value is about to change
+			while (t2x != x3) {
+				e2 += dy2;
+				while (e2 >= dx2) {
+					e2 -= dx2;
+					if (changed2) t2xp = signx2;
+					else          goto next4;
+				}
+				if (changed2)     break;
+				else              t2x += signx2;
+			}
+		next4:
+
+			if (minx > t1x) minx = t1x; if (minx > t2x) minx = t2x;
+			if (maxx < t1x) maxx = t1x; if (maxx < t2x) maxx = t2x;
+			drawline(minx, maxx, y);
+			if (!changed1) t1x += signx1;
+			t1x += t1xp;
+			if (!changed2) t2x += signx2;
+			t2x += t2xp;
+			y += 1;
+			if (y > y3) return;
+		}
+	}
+
+	void DrawCircle(int xc, int yc, int r, short c = 0x2588, short col = 0x000F)
+	{
+		int x = 0;
+		int y = r;
+		int p = 3 - 2 * r;
+		if (!r) return;
+
+		while (y >= x) // only formulate 1/8 of circle
+		{
+			Draw(xc - x, yc - y, c, col);//upper left left
+			Draw(xc - y, yc - x, c, col);//upper upper left
+			Draw(xc + y, yc - x, c, col);//upper upper right
+			Draw(xc + x, yc - y, c, col);//upper right right
+			Draw(xc - x, yc + y, c, col);//lower left left
+			Draw(xc - y, yc + x, c, col);//lower lower left
+			Draw(xc + y, yc + x, c, col);//lower lower right
+			Draw(xc + x, yc + y, c, col);//lower right right
+			if (p < 0) p += 4 * x++ + 6;
+			else p += 4 * (x++ - y--) + 10;
+		}
+	}
 
 protected:
 	int m_nScreenWidth;
@@ -1501,8 +1673,7 @@ protected: // Audio Engine =====================================================
 	SDL_AudioDeviceID deviceID;
 	SDL_AudioSpec spec, sampleSpec;
 
-	//thx J. Random Programmer
-	std::atomic<float> m_fGlobalTime = {0.0f};
+	std::atomic<float> m_fGlobalTime = 0.0f;
 };
 
 std::atomic<bool> olcConsoleGameEngine::m_bAtomActive(false);
