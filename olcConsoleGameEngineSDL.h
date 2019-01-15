@@ -205,7 +205,7 @@ Character Set -> Use Unicode. Thanks! For now, Ill try enabling it for you - Jav
 #define VK_F11 (SDLK_F11 & 0xffff)				  + KEY_OFFSET
 #define VK_F12 (SDLK_F12 & 0xffff)				  + KEY_OFFSET
 #define VK_MENU (SDLK_MENU & 0xffff)			  + KEY_OFFSET
-#define VK_OEM_3 (SDLK_GRAVE & 0xffff)			  + KEY_OFFSET
+
 
 struct CHAR_INFO
 {
@@ -368,7 +368,7 @@ public:
 			return m_Colours[sy * nWidth + sx];
 	}
 
-	bool Save(std::wstring sFile)
+	bool Save(std::string sFile)
 	{
 		FILE *f = nullptr;
 
@@ -398,7 +398,7 @@ public:
 		return true;
 	}
 
-	bool Load(std::wstring sFile)
+	bool Load(std::string sFile)
 	{
 		delete[] m_Glyphs;
 		delete[] m_Colours;
@@ -1384,27 +1384,7 @@ protected:
 		}
 	}
 
-	void DrawCircle(int xc, int yc, int r, short c = 0x2588, short col = 0x000F)
-	{
-		int x = 0;
-		int y = r;
-		int p = 3 - 2 * r;
-		if (!r) return;
-
-		while (y >= x) // only formulate 1/8 of circle
-		{
-			Draw(xc - x, yc - y, c, col);//upper left left
-			Draw(xc - y, yc - x, c, col);//upper upper left
-			Draw(xc + y, yc - x, c, col);//upper upper right
-			Draw(xc + x, yc - y, c, col);//upper right right
-			Draw(xc - x, yc + y, c, col);//lower left left
-			Draw(xc - y, yc + x, c, col);//lower lower left
-			Draw(xc + y, yc + x, c, col);//lower lower right
-			Draw(xc + x, yc + y, c, col);//lower right right
-			if (p < 0) p += 4 * x++ + 6;
-			else p += 4 * (x++ - y--) + 10;
-		}
-	}
+	
 
 protected:
 	int m_nScreenWidth;
@@ -1673,7 +1653,7 @@ protected: // Audio Engine =====================================================
 	SDL_AudioDeviceID deviceID;
 	SDL_AudioSpec spec, sampleSpec;
 
-	std::atomic<float> m_fGlobalTime = 0.0f;
+	std::atomic<float> m_fGlobalTime{0.0f};
 };
 
 std::atomic<bool> olcConsoleGameEngine::m_bAtomActive(false);
