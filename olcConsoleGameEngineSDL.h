@@ -289,7 +289,7 @@ public:
 		Create(w, h);
 	}
 
-	olcSprite(std::wstring sFile)
+	olcSprite(std::string sFile)
 	{
 		if (!Load(sFile))
 			Create(8, 8);
@@ -368,71 +368,44 @@ public:
 			return m_Colours[sy * nWidth + sx];
 	}
 
-	bool Save(std::string sFile)
-	{
-		FILE *f = nullptr;
+	    bool Save(std::string sFile)
+    {
+                std::ofstream f(sFile.c_str(), std::ios::out | std::ios::binary);
+                if (!f.is_open()) return false;
 
-		char buff[256];
-#ifdef _WIN32
-		size_t t;
-		wcstombs_s(&t, buff, sFile.c_str(), 256);
-#else
-		wcstombs(buff, sFile.c_str(), 256);
-#endif
+                f.write((char*)&nWidth, sizeof(int));
+        f.write((char*)&nHeight, sizeof(int));
+        f.write((char*)m_Colours, sizeof(short) * nWidth * nHeight);
+        f.write((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
 
-#ifdef _WIN32
-		fopen_s(&f, buff, "wb");
-#else
-		f = std::fopen(buff, "wb");
-#endif
-		if (f == nullptr)
-			return false;
+        f.close();
 
-		fwrite(&nWidth, sizeof(int), 1, f);
-		fwrite(&nHeight, sizeof(int), 1, f);
-		fwrite(m_Colours, sizeof(short), nWidth * nHeight, f);
-		fwrite(m_Glyphs, sizeof(wchar_t), nWidth * nHeight, f);
+        return true;
+    }
 
-		fclose(f);
+    bool Load(std::string sFile)
+    {
+        delete[] m_Glyphs;
+        delete[] m_Colours;
+        nWidth = 0;
+        nHeight = 0;
 
-		return true;
-	}
+                std::ifstream f(sFile.c_str(), std::ios::in | std::ios::binary);
+                if (!f.is_open()) return false;
 
-	bool Load(std::string sFile)
-	{
-		delete[] m_Glyphs;
-		delete[] m_Colours;
-		nWidth = 0;
-		nHeight = 0;
+                // get file data
+                f.read ((char*)&nWidth, sizeof(int));
+                f.read ((char*)&nHeight, sizeof(int));
 
-		FILE *f = nullptr;
-		char buff[256];
-#ifdef _WIN32
-		size_t t;
-		wcstombs_s(&t, buff, sFile.c_str(), 256);
-#else
-		wcstombs(buff, sFile.c_str(), 256);
-#endif
+        Create(nWidth, nHeight);
+                
+                f.read ((char*)m_Colours, sizeof(short) * nWidth * nHeight);
+                f.read ((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
 
-#ifdef _WIN32
-		fopen_s(&f, buff, "rb");
-#else
-		f = std::fopen(buff, "rb");
-#endif
-		if (f == nullptr)
-			return false;
+                f.close();
 
-		fread(&nWidth, sizeof(int), 1, f);
-		fread(&nHeight, sizeof(int), 1, f);
-
-		Create(nWidth, nHeight);
-
-		fread(m_Colours, sizeof(short), nWidth * nHeight, f);
-		fread(m_Glyphs, sizeof(wchar_t), nWidth * nHeight, f);
-
-		fclose(f);
-		return true;
-	}
+        return true;
+    }
 };
 
 int len = 0, done = 0, bits = 0, which = 0,
