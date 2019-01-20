@@ -368,44 +368,48 @@ public:
 			return m_Colours[sy * nWidth + sx];
 	}
 
-	    bool Save(std::string sFile)
-    {
-                std::ofstream f(sFile.c_str(), std::ios::out | std::ios::binary);
-                if (!f.is_open()) return false;
+	    bool Save(std::wstring sFile)
+	{
+		std::string path(sFile.begin(), sFile.end());
 
-                f.write((char*)&nWidth, sizeof(int));
-        f.write((char*)&nHeight, sizeof(int));
-        f.write((char*)m_Colours, sizeof(short) * nWidth * nHeight);
-        f.write((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
+		std::ofstream f(path.c_str(), std::ios::out | std::ios::binary);
+		if (!f.is_open()) return false;
 
-        f.close();
+		f.write((char*)&nWidth, sizeof(int));
+		f.write((char*)&nHeight, sizeof(int));
+		f.write((char*)m_Colours, sizeof(short) * nWidth * nHeight);
+		f.write((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
 
-        return true;
-    }
+		f.close();
 
-    bool Load(std::string sFile)
-    {
-        delete[] m_Glyphs;
-        delete[] m_Colours;
-        nWidth = 0;
-        nHeight = 0;
+		return true;
+	}
 
-                std::ifstream f(sFile.c_str(), std::ios::in | std::ios::binary);
-                if (!f.is_open()) return false;
+	bool Load(std::wstring sFile)
+	{
+		delete[] m_Glyphs;
+		delete[] m_Colours;
+		nWidth = 0;
+		nHeight = 0;
 
-                // get file data
-                f.read ((char*)&nWidth, sizeof(int));
-                f.read ((char*)&nHeight, sizeof(int));
+		std::string path(sFile.begin(), sFile.end());
 
-        Create(nWidth, nHeight);
-                
-                f.read ((char*)m_Colours, sizeof(short) * nWidth * nHeight);
-                f.read ((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
+		std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
+		if (!f.is_open()) return false;
 
-                f.close();
+		// get file data
+		f.read((char*)&nWidth, sizeof(int));
+		f.read((char*)&nHeight, sizeof(int));
 
-        return true;
-    }
+		Create(nWidth, nHeight);
+
+		f.read((char*)m_Colours, sizeof(short) * nWidth * nHeight);
+		f.read((char*)m_Glyphs, sizeof(wchar_t) * nWidth * nHeight);
+
+		f.close();
+
+		return true;
+	}
 };
 
 int len = 0, done = 0, bits = 0, which = 0,
