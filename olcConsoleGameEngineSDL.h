@@ -173,7 +173,7 @@ Character Set -> Use Unicode. Thanks! For now, Ill try enabling it for you - Jav
 #include <string>
 
 #define KEY_OFFSET 256
-#define VK_SPACE (SDLK_SPACE & 0xffff) 		  + KEY_OFFSET
+#define VK_SPACE (SDLK_SPACE & 0xffff) 			 + KEY_OFFSET
 #define VK_BACK (SDLK_BACKSPACE & 0xffff)		  + KEY_OFFSET
 #define VK_DELETE (SDLK_DELETE & 0xffff)		  + KEY_OFFSET
 #define VK_HOME (SDLK_HOME & 0xffff)			  + KEY_OFFSET
@@ -185,7 +185,7 @@ Character Set -> Use Unicode. Thanks! For now, Ill try enabling it for you - Jav
 #define VK_RSHIFT (SDLK_RSHIFT & 0xffff)		  + KEY_OFFSET
 #define VK_LCONTROL (SDLK_LCTRL & 0xffff)		  + KEY_OFFSET
 #define VK_RCONTROL (SDLK_RCTRL & 0xffff)		  + KEY_OFFSET
-#define VK_PRIOR (SDLK_PAGEUP & 0xffff)		  + KEY_OFFSET
+#define VK_PRIOR (SDLK_PAGEUP & 0xffff)			  + KEY_OFFSET
 #define VK_NEXT (SDLK_PAGEDOWN & 0xffff)		  + KEY_OFFSET
 #define VK_ESCAPE (SDLK_ESCAPE & 0xffff)		  + KEY_OFFSET
 #define VK_UP (SDLK_UP & 0xffff)				  + KEY_OFFSET
@@ -266,7 +266,7 @@ constexpr SDL_Color colour_lookup[] = {
 	SDL_Color{ 127,0,127,255 },  // 5
 	SDL_Color{ 127,127,0,255 },  // 6
 	SDL_Color{ 192,192,192,255 },// 7
-	SDL_Color{ 127,127,127,255 },      // 8
+	SDL_Color{ 127,127,127,255 },// 8
 	SDL_Color{ 0,0,255,255 },    // 9
 	SDL_Color{ 0,255,0,255 },    // A
 	SDL_Color{ 0,255,255,255 },  // B
@@ -289,10 +289,15 @@ public:
 		Create(w, h);
 	}
 
-	olcSprite(std::string sFile)
+	olcSprite(std::wstring sFile)
 	{
 		if (!Load(sFile))
 			Create(8, 8);
+	}
+
+	~olcSprite() {
+		delete[] m_Glyphs;
+		delete[] m_Colours;
 	}
 
 	int nWidth = 0;
@@ -368,11 +373,15 @@ public:
 			return m_Colours[sy * nWidth + sx];
 	}
 
-	    bool Save(std::wstring sFile)
+	bool Save(std::wstring sFile)
 	{
 		std::string path(sFile.begin(), sFile.end());
 
+#ifdef __APPLE__
 		std::ofstream f(path.c_str(), std::ios::out | std::ios::binary);
+#else
+		std::ofstream f(sFile.c_str(), std::ios::out | std::ios::binary);
+#endif
 		if (!f.is_open()) return false;
 
 		f.write((char*)&nWidth, sizeof(int));
@@ -394,7 +403,11 @@ public:
 
 		std::string path(sFile.begin(), sFile.end());
 
+#ifdef __APPLE__
 		std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
+#else
+		std::ifstream f(sFile.c_str(), std::ios::in | std::ios::binary);
+#endif
 		if (!f.is_open()) return false;
 
 		// get file data
@@ -706,7 +719,6 @@ public:
 		// Start the thread
 		//std::thread t = std::thread(&olcConsoleGameEngine::GameThread, this);
 		GameThread();
-
 		// Wait for thread to be exited
 		//t.join();
 	}
@@ -738,7 +750,6 @@ private:
 #else
 		wcstombs(bufAppName, m_sAppName.c_str(), 256);
 #endif
-
 		// Create Window
 		m_window = SDL_CreateWindow(
 			bufAppName,
@@ -907,79 +918,6 @@ private:
 
 					m_mouseOldState[m] = m_mouseNewState[m];
 				}
-
-				// Handle Mouse Input - Check for window events
-			/*	INPUT_RECORD inBuf[32];
-				DWORD events = 0;
-				GetNumberOfConsoleInputEvents(m_hConsoleIn, &events);
-				if (events > 0)
-					ReadConsoleInput(m_hConsoleIn, inBuf, events, &events);*/
-
-					// Handle events - we only care about mouse clicks and movement
-					// for now
-					//for (DWORD i = 0; i < events; i++)
-					//{
-					//	switch (inBuf[i].EventType)
-					//	{
-					//	case FOCUS_EVENT:
-					//	{
-					//		m_bConsoleInFocus = inBuf[i].Event.FocusEvent.bSetFocus;
-					//	}
-					//	break;
-
-					//	case MOUSE_EVENT:
-					//	{
-					//		switch (inBuf[i].Event.MouseEvent.dwEventFlags)
-					//		{
-					//		case MOUSE_MOVED:
-					//		{
-					//			m_mousePosX = inBuf[i].Event.MouseEvent.dwMousePosition.X;
-					//			m_mousePosY = inBuf[i].Event.MouseEvent.dwMousePosition.Y;
-					//		}
-					//		break;
-
-					//		case 0:
-					//		{
-					//			for (int m = 0; m < 5; m++)
-					//				m_mouseNewState[m] = (inBuf[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
-
-					//		}
-					//		break;
-
-					//		default:
-					//			break;
-					//		}
-					//	}
-					//	break;
-
-					//	default:
-					//		break;
-					//		// We don't care just at the moment
-					//	}
-					//}
-
-					/*for (int m = 0; m < 5; m++)
-					{
-						m_mouse[m].bPressed = false;
-						m_mouse[m].bReleased = false;
-
-						if (m_mouseNewState[m] != m_mouseOldState[m])
-						{
-							if (m_mouseNewState[m])
-							{
-								m_mouse[m].bPressed = true;
-								m_mouse[m].bHeld = true;
-							}
-							else
-							{
-								m_mouse[m].bReleased = true;
-								m_mouse[m].bHeld = false;
-							}
-						}
-
-						m_mouseOldState[m] = m_mouseNewState[m];
-					}
-	*/
 
 	// Handle Frame Update
 				if (!OnUserUpdate(fElapsedTime))
@@ -1361,7 +1299,7 @@ protected:
 		}
 	}
 
-	
+
 
 protected:
 	int m_nScreenWidth;
@@ -1418,6 +1356,7 @@ protected: // Audio Engine =====================================================
 			cvt.buf = (uint8_t *)malloc(streamLen * cvt.len_mult);
 			cvt.len = streamLen;
 			memcpy(cvt.buf, wavData, streamLen);
+			free(cvt.buf);
 			SDL_FreeWAV((uint8_t *)wavData);
 			if (SDL_ConvertAudio(&cvt) == -1) {
 				std::cout << "Failed to convert audio!\n" << SDL_GetError() << '\n';
@@ -1630,7 +1569,7 @@ protected: // Audio Engine =====================================================
 	SDL_AudioDeviceID deviceID;
 	SDL_AudioSpec spec, sampleSpec;
 
-	std::atomic<float> m_fGlobalTime{0.0f};
+	std::atomic<float> m_fGlobalTime{ 0.0f };
 };
 
 std::atomic<bool> olcConsoleGameEngine::m_bAtomActive(false);
