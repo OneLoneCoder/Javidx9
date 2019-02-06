@@ -10,7 +10,7 @@
 
 MAKEFLAGS += --no-builtin-rules
 # most programs work with c++11, but OneLoneCoder_Mazes requires 14 for the period definition
-CPPFLAGS=-DUNICODE -I/usr/include/SDL2 -std=c++14
+CPPFLAGS=-DUNICODE -I/usr/include/SDL2 -I.. -std=c++14
 LDFLAGS=
 LDLIBS=-lSDL2 -lpthread
 
@@ -47,12 +47,11 @@ EXAMPLES= \
 	OneLoneCoder_RetroArcadeRacer \
 	OneLoneCoder_Splines1 \
 	OneLoneCoder_Splines2 \
-	OneLoneCoder_SpriteEditor \
-	OneLoneCoder_Webcam
+	OneLoneCoder_SpriteEditor
 
 all: $(EXAMPLES)
 
-%_linux.cpp: %.cpp
+%_linux.cpp: ../%.cpp
 	cat $< | sed 's/olcConsoleGameEngine.h/olcConsoleGameEngineSDL.h/g' | sed 's/VK_SHIFT/VK_LSHIFT/g' | sed 's/VK_CONTROL/VK_LCONTROL/g' > $@
 
 %: %_linux.cpp
