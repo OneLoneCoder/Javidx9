@@ -5,7 +5,7 @@
 # sudo apt install libsdl2-dev
 # make
 #
-# (C) 2018 Giampiero Salvi <giampisalvi@gmail.com>
+# (C) 2019 Giampiero Salvi <giampisalvi@gmail.com>
 # LICENSE: GPL 3
 
 MAKEFLAGS += --no-builtin-rules
