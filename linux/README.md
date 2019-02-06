@@ -11,3 +11,9 @@ sudo apt install libsdl2-dev
 ```
 make
 ```
+## Run
+You need to run the programs from the top directory of the repository in order to find the additional files, such as sprites, for example:
+```
+cd ..
+linux/OneLoneCoder_Asteroids
+```
