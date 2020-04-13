@@ -374,7 +374,7 @@ protected:
 
 		// Display Map & Player
 		for (int nx = 0; nx < nMapWidth; nx++)
-			for (int ny = 0; ny < nMapWidth; ny++)
+			for (int ny = 0; ny < nMapHeight; ny++)
 				Draw(nx+1, ny+1, map[ny * nMapWidth + nx]);
 		Draw(1 + (int)fPlayerY, 1 + (int)fPlayerX, L'P');
 		
