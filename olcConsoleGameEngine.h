@@ -371,7 +371,7 @@ public:
 		// Set the size of the screen buffer
 		COORD coord = { (short)m_nScreenWidth, (short)m_nScreenHeight };
 		if (!SetConsoleScreenBufferSize(m_hConsole, coord))
-			Error(L"SetConsoleScreenBufferSize");
+			return Error(L"SetConsoleScreenBufferSize");
 
 		// Assign screen buffer to the console
 		if (!SetConsoleActiveScreenBuffer(m_hConsole))
