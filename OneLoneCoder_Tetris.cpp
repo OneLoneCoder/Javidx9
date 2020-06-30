@@ -55,17 +55,30 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <memory>
 using namespace std;
 
 #include <stdio.h>
+
+#ifndef UNICODE
+#define UNICODE
+#endif
+#ifndef _UNICODE
+#define _UNICODE
+#endif
 #include <Windows.h>
 
-int nScreenWidth = 80;			// Console Screen Size X (columns)
-int nScreenHeight = 30;			// Console Screen Size Y (rows)
+#ifdef _MSC_VER
+// GetAsyncKeyState
+#pragma comment(lib, "User32.lib")
+#endif
+
+int nScreenWidth;			// Console Screen Size X (columns)
+int nScreenHeight;			// Console Screen Size Y (rows)
 wstring tetromino[7];
 int nFieldWidth = 12;
 int nFieldHeight = 18;
-unsigned char *pField = nullptr;
+unique_ptr<unsigned char[]> pField;
 
 int Rotate(int px, int py, int r)
 {
@@ -127,8 +140,14 @@ bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY)
 
 int main()
 {
+	// Get the console information
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	nScreenWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	nScreenHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	
 	// Create Screen Buffer
-	wchar_t *screen = new wchar_t[nScreenWidth*nScreenHeight];
+	unique_ptr<wchar_t[]> screen(new wchar_t[nScreenWidth * nScreenHeight]);
 	for (int i = 0; i < nScreenWidth*nScreenHeight; i++) screen[i] = L' ';
 	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(hConsole);
@@ -142,7 +161,7 @@ int main()
 	tetromino[5].append(L".X...X...XX.....");
 	tetromino[6].append(L"..X...X..XX.....");
 
-	pField = new unsigned char[nFieldWidth*nFieldHeight]; // Create play field buffer
+	pField = unique_ptr<unsigned char[]>(new unsigned char[nFieldWidth * nFieldHeight]); // Create play field buffer
 	for (int x = 0; x < nFieldWidth; x++) // Board Boundary
 		for (int y = 0; y < nFieldHeight; y++)
 			pField[y*nFieldWidth + x] = (x == 0 || x == nFieldWidth - 1 || y == nFieldHeight - 1) ? 9 : 0;
@@ -260,7 +279,7 @@ int main()
 		if (!vLines.empty())
 		{
 			// Display Frame (cheekily to draw lines)
-			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+			WriteConsoleOutputCharacter(hConsole, screen.get(), nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 			this_thread::sleep_for(400ms); // Delay a bit
 
 			for (auto &v : vLines)
@@ -275,7 +294,7 @@ int main()
 		}
 
 		// Display Frame
-		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+		WriteConsoleOutputCharacter(hConsole, screen.get(), nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 	}
 
 	// Oh Dear
