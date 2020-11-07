@@ -377,7 +377,7 @@ public:
 	{
 		std::string path(sFile.begin(), sFile.end());
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux)
 		std::ofstream f(path.c_str(), std::ios::out | std::ios::binary);
 #else
 		std::ofstream f(sFile.c_str(), std::ios::out | std::ios::binary);
@@ -403,7 +403,7 @@ public:
 
 		std::string path(sFile.begin(), sFile.end());
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux)
 		std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
 #else
 		std::ifstream f(sFile.c_str(), std::ios::in | std::ios::binary);
