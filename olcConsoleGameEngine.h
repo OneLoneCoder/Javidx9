@@ -377,6 +377,11 @@ public:
 		if (!SetConsoleActiveScreenBuffer(m_hConsole))
 			return Error(L"SetConsoleActiveScreenBuffer");
 		
+		// We should set our console output codepage to make sure that the Consolas font can be set correctly on some machines before we call SetCurrentConsoleFontEx.
+		// Doc:https://docs.microsoft.com/en-us/windows/console/console-code-pages
+		SetConsoleOutputCP(CP_UTF8);
+		SetConsoleCP(CP_UTF8);
+
 		// Set the font size now that the screen buffer has been assigned to the console
 		CONSOLE_FONT_INFOEX cfi;
 		cfi.cbSize = sizeof(cfi);
