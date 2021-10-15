@@ -1,3 +1,6 @@
+# IMPORTANT
+The olcConsoleGameEngine is lots of fun, but not very portable. If you want a more conventional user experience, but an identical programming experience, which is faster, and very portable, check out the olcPixelGameEngine https://github.com/OneLoneCoder/olcPixelGameEngine
+
 # videos
 OneLoneCoder One Off Programs
 
