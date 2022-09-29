@@ -175,10 +175,6 @@ protected:
 			// Sort Untested nodes by global goal, so lowest is first
 			listNotTestedNodes.sort([](const sNode* lhs, const sNode* rhs){ return lhs->fGlobalGoal < rhs->fGlobalGoal; } );
 
-			// Abort if there are no valid nodes left to test
-			if (listNotTestedNodes.empty())
-				break;
-
 			nodeCurrent = listNotTestedNodes.front();
 			listNotTestedNodes.pop_front();
 					
