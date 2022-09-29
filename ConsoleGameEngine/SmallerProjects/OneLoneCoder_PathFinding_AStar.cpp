@@ -158,6 +158,7 @@ protected:
 		sNode *nodeCurrent = nodeStart;
 		nodeStart->fLocalGoal = 0.0f;
 		nodeStart->fGlobalGoal = heuristic(nodeStart, nodeEnd);
+		nodeStart->bVisited = true;
 
 		// Add start node to not tested list - this will ensure it gets tested.
 		// As the algorithm progresses, newly discovered nodes get added to this
@@ -173,19 +174,13 @@ protected:
 		{
 			// Sort Untested nodes by global goal, so lowest is first
 			listNotTestedNodes.sort([](const sNode* lhs, const sNode* rhs){ return lhs->fGlobalGoal < rhs->fGlobalGoal; } );
-			
-			// Front of listNotTestedNodes is potentially the lowest distance node. Our
-			// list may also contain nodes that have been visited, so ditch these...
-			while(!listNotTestedNodes.empty() && listNotTestedNodes.front()->bVisited)
-				listNotTestedNodes.pop_front();
 
-			// ...or abort because there are no valid nodes left to test
+			// Abort if there are no valid nodes left to test
 			if (listNotTestedNodes.empty())
 				break;
 
 			nodeCurrent = listNotTestedNodes.front();
-			nodeCurrent->bVisited = true; // We only explore a node once
-			
+			listNotTestedNodes.pop_front();
 					
 			// Check each of this node's neighbours...
 			for (auto nodeNeighbour : nodeCurrent->vecNeighbours)
@@ -193,7 +188,10 @@ protected:
 				// ... and only if the neighbour is not visited and is 
 				// not an obstacle, add it to NotTested List
 				if (!nodeNeighbour->bVisited && nodeNeighbour->bObstacle == 0)
+				{
 					listNotTestedNodes.push_back(nodeNeighbour);
+					nodeNeighbour->bVisited = true; // We only explore a node once
+				}
 
 				// Calculate the neighbours potential lowest parent distance
 				float fPossiblyLowerGoal = nodeCurrent->fLocalGoal + distance(nodeCurrent, nodeNeighbour);
