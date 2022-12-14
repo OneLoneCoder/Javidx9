@@ -99,7 +99,7 @@
 	You will need a modern C++ compiler, so update yours!
 	To compile use the command:
 
-	g++ -o YourProgName YourSource.cpp -lX11 -lGL -lpthread -lpng
+	g++ -o YourProgName YourSource.cpp -lX11 -lGL -lpthread -lpng -lstdc++fs
 
 	On some Linux configurations, the frame rate is locked to the refresh
 	rate of the monitor. This engine tries to unlock it but may not be
@@ -133,7 +133,7 @@
 
 	Author
 	~~~~~~ 
-	David Barr, aka javidx9, ©OneLoneCoder 2018, 2019
+	David Barr, aka javidx9, Â©OneLoneCoder 2018, 2019
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////// 
