@@ -52,7 +52,7 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2018, 2019, 2020
+	David Barr, aka javidx9, ï¿½OneLoneCoder 2018, 2019, 2020
 */
 
 #define OLC_PGE_APPLICATION
@@ -81,11 +81,14 @@ public:
 public:
 	bool OnUserCreate() override
 	{
-		//pFractal = new int[ScreenWidth() * ScreenHeight()]{ 0 };
-
+#ifdef _WIN32
 		// Using Vector extensions, align memory (not as necessary as it used to be)
 		// MS Specific - see std::aligned_alloc for others
 		pFractal = (int*)_aligned_malloc(size_t(ScreenWidth()) * size_t(ScreenHeight()) * sizeof(int), 64);
+#else
+		// pFractal = new int[ScreenWidth() * ScreenHeight()]{0};
+		pFractal = (int *)aligned_alloc(size_t(ScreenWidth()) * size_t(ScreenHeight()) * sizeof(int), 64);
+#endif
 
 		InitialiseThreadPool();
 		return true;
@@ -104,8 +107,13 @@ public:
 		for (int i = 0; i < nMaxThreads; i++)
 			workers[i].thread.join();
 
-		// Clean up memory
+			// Clean up memory
+#ifdef _WIN32
 		_aligned_free(pFractal);
+#else
+		// delete[] pFractal;
+		free(pFractal);
+#endif
 		return true;
 	}
 
@@ -288,10 +296,18 @@ public:
 				if (_mm256_movemask_pd(_mm256_castsi256_pd(_mask2)) > 0)
 					goto repeat;
 
+#ifdef _WIN32
 				pFractal[y_offset + x + 0] = int(_n.m256i_i64[3]);
 				pFractal[y_offset + x + 1] = int(_n.m256i_i64[2]);
 				pFractal[y_offset + x + 2] = int(_n.m256i_i64[1]);
 				pFractal[y_offset + x + 3] = int(_n.m256i_i64[0]);
+#else
+				// * compile with option "-march=native" on Linux
+				pFractal[y_offset + x + 0] = int(_n[3]);
+				pFractal[y_offset + x + 1] = int(_n[2]);
+				pFractal[y_offset + x + 2] = int(_n[1]);
+				pFractal[y_offset + x + 3] = int(_n[0]);
+#endif
 				_x_pos = _mm256_add_pd(_x_pos, _x_jump);
 			}
 
@@ -415,10 +431,18 @@ public:
 						if (_mm256_movemask_pd(_mm256_castsi256_pd(_mask2)) > 0)
 							goto repeat;
 
+#ifdef _WIN32
 						fractal[y_offset + x + 0] = int(_n.m256i_i64[3]);
 						fractal[y_offset + x + 1] = int(_n.m256i_i64[2]);
 						fractal[y_offset + x + 2] = int(_n.m256i_i64[1]);
 						fractal[y_offset + x + 3] = int(_n.m256i_i64[0]);
+#else
+						// * compile with option "-march=native" on Linux
+						fractal[y_offset + x + 0] = int(_n[3]);
+						fractal[y_offset + x + 1] = int(_n[2]);
+						fractal[y_offset + x + 2] = int(_n[1]);
+						fractal[y_offset + x + 3] = int(_n[0]);
+#endif
 						_x_pos = _mm256_add_pd(_x_pos, _x_jump);
 					}
 
