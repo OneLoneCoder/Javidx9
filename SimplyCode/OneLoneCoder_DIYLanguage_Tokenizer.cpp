@@ -52,7 +52,7 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2024
+	David Barr, aka javidx9, Â©OneLoneCoder 2024
 */
 
 #include <iostream>
@@ -293,7 +293,7 @@ namespace olc::lang
 					{
 						// A numeric literal has been found
 						sCurrentToken = charNow[0];
-						++charNow;
+						
 
 						// If first digit is '0' then it may be a non-base10 literal
 						if (charNow[0] == '0')
@@ -306,6 +306,8 @@ namespace olc::lang
 							// Base10
 							stateNext = TokeniserState::NumericLiteral;
 						}
+
+						++charNow;
 					}
 
 					// Check for operators
