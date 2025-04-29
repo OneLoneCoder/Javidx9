@@ -71,9 +71,9 @@ int main()
 	};
 
 	std::unordered_map<char, sOperator> mapOps;
-	mapOps['/'] = { 4, 2 };
-	mapOps['*'] = { 3, 2 };
-	mapOps['+'] = { 2, 2 };
+	mapOps['/'] = { 2, 2 };
+	mapOps['*'] = { 2, 2 };
+	mapOps['+'] = { 1, 2 };
 	mapOps['-'] = { 1, 2 };
 
 	std::string sExpression = "-((1+2)/((6*-7)+(7*-4)/2)-3)";
