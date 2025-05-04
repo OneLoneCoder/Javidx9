@@ -52,9 +52,41 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2018, 2019, 2020
+	David Barr, aka javidx9, ï¿½OneLoneCoder 2018, 2019, 2020
 */
 
+/*
+On Linux need to install fluidsynth, compile with -lfluidsynth, 
+and add a midi font file `midi_font.sf2`.
+https://github.com/FluidSynth/fluidsynth
+
+Install fluidsynth (default location is /usr/local)
+```
+wget https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.3.2.zip
+unzip v2.3.2.zip
+cd fluidsynth-2.3.2
+mkdir -p build
+cd build
+cmake ..
+cmake --build .
+cmake --install .
+```
+
+Compile with `-lfluidsynth`
+```
+g++ -o midi OneLoneCoder_PGE_MIDI.cpp -lfluidsynth -I../BiggerProjects/CarCrimeCity/Part2 -lGL -lpng -lX11 -lpthread -lstdc++fs -std=c++17
+```
+
+Download a MIDI Font (there are many online), or install `vlc-plugin-fluidsynth`, it adds a default.sf2 at `/usr/share/sounds/sf2/default-GM.sf2`
+```
+sudo apt install vlc-plugin-fluidsynth
+```
+
+Once you have `ff7_battle.mid` and `midi_font.sf2`, just run
+```
+./midi
+```
+*/
 
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
@@ -62,7 +94,11 @@
 #include <fstream>
 #include <array>
 
+#ifdef WIN32
 //#pragma comment(lib, "winmm.lib")
+#else
+#include <fluidsynth.h>
+#endif
 
 
 struct MidiEvent
@@ -498,7 +534,16 @@ public:
 
 	MidiFile midi;
 
+#ifdef WIN32
 	//HMIDIOUT hInstrument;
+#else
+	fluid_settings_t *settings = NULL;
+	fluid_synth_t *synth = NULL;
+	fluid_audio_driver_t *adriver = NULL;
+	int sfont_id;
+	int i, key;
+	const char *sMidiFontFile = "midi_font.sf2";
+#endif
 	size_t nCurrentNote[16]{ 0 };
 
 	double dSongTime = 0.0;
@@ -512,6 +557,7 @@ public:
 
 		midi.ParseFile("ff7_battle.mid");
 
+#ifdef WIN32
 		/*
 		int nMidiDevices = midiOutGetNumDevs();
 		if (nMidiDevices > 0)
@@ -522,7 +568,45 @@ public:
 			}
 		}
 		*/
+#else
+		/* Create the settings. */
+		settings = new_fluid_settings();
+		if (settings == NULL)
+		{
+			puts("Failed to create the settings!");
+			return false;
+		}
 
+		/* Change the settings if necessary*/
+
+		/* Create the synthesizer. */
+		synth = new_fluid_synth(settings);
+		if (synth == NULL)
+		{
+			puts("Failed to create the synth!");
+			return false;
+		}
+
+		/* Load a SoundFont and reset presets (so that new instruments
+		 * get used from the SoundFont)
+		 * Depending on the size of the SoundFont, this will take some time to complete...
+		 */
+		sfont_id = fluid_synth_sfload(synth, sMidiFontFile, 1);
+		if (sfont_id == FLUID_FAILED)
+		{
+			puts("Loading the SoundFont failed!");
+			return false;
+		}
+
+		/* Create the audio driver. The synthesizer starts playing as soon
+		   as the driver is created. */
+		adriver = new_fluid_audio_driver(settings, synth);
+		if (adriver == NULL)
+		{
+			puts("Failed to create the audio driver!");
+			return false;
+		}
+#endif
 
 		return true;
 	}
@@ -584,12 +668,19 @@ public:
 						uint32_t nNote = midi.vecTracks[nTrack].vecEvents[nCurrentNote[nTrack]].nKey;
 						uint32_t nVelocity = midi.vecTracks[nTrack].vecEvents[nCurrentNote[nTrack]].nVelocity;
 
+#ifdef WIN32
 						if (midi.vecTracks[nTrack].vecEvents[nCurrentNote[nTrack]].event == MidiEvent::Type::NoteOn)
 							nStatus = 0x90;
 						else
 							nStatus = 0x80;
 
 						midiOutShortMsg(hInstrument, (nVelocity << 16) | (nNote << 8) | nStatus);
+#else
+						if (midi.vecTracks[nTrack].vecEvents[nCurrentNote[nTrack]].event == MidiEvent::Type::NoteOn)
+							fluid_synth_noteon(synth, nTrack, nNote, nVelocity);
+						else
+							fluid_synth_noteoff(synth, nTrack, nNote);
+#endif
 						nCurrentNote[nTrack]++;
 					}
 					else
@@ -598,6 +689,7 @@ public:
 			}
 		}
 
+#ifdef WIN32
 		if (GetKey(olc::Key::SPACE).bPressed)
 		{
 			midiOutShortMsg(hInstrument, 0x00403C90);
@@ -607,12 +699,33 @@ public:
 		{
 			midiOutShortMsg(hInstrument, 0x00003C80);
 		}
+#else
+		if (GetKey(olc::Key::SPACE).bPressed)
+		{
+			fluid_synth_noteon(synth, 0, 0x3C, 0x40);
+		}
+		if (GetKey(olc::Key::SPACE).bReleased)
+		{
+			fluid_synth_noteoff(synth, 0, 0x3C);
+		}
+#endif
 		*/
 
 
 		return true;
 	}
 
+#ifndef WIN32
+    bool OnUserDestroy() override
+    {
+        /* Clean up */
+        delete_fluid_audio_driver(adriver);
+        delete_fluid_synth(synth);
+        delete_fluid_settings(settings);
+
+        return true;
+    }
+#endif
 	
 };
 
