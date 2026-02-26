@@ -52,7 +52,7 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2018, 2019, 2020
+	David Barr, aka javidx9, Â©OneLoneCoder 2018, 2019, 2020
 */
 
 #define OLC_PGE_APPLICATION
@@ -230,7 +230,7 @@ public:
 
 		// Sort collisions in order of distance
 		olc::vf2d cp, cn;
-		float t = 0, min_t = INFINITY;
+		float t = 0;
 		std::vector<std::pair<int, float>> z;
  
 		// Work out collision point, add it to vector along with rect ID
